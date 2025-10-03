@@ -5,8 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const invoiceOutput = document.getElementById('invoice-output');
     const addItemBtn = document.getElementById('add-item-btn');
 
-    let itemIndex = 1;
-
     // Add item functionality
     addItemBtn.addEventListener('click', function (e) {
         e.preventDefault();
@@ -37,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize calculations for the first item
     setupItemCalculations();
 });
+
+let itemIndex = 1;
 
 function addNewItem() {
     const container = document.getElementById('items-container');
@@ -111,6 +111,10 @@ function setupItemCalculations(specificIndex = null) {
             totalInput.value = total.toFixed(2);
             updateTotals();
         }
+
+        // Remove any existing event listeners to avoid duplicates
+        quantityInput.removeEventListener('input', calculateItemTotal);
+        priceInput.removeEventListener('input', calculateItemTotal);
 
         quantityInput.addEventListener('input', calculateItemTotal);
         priceInput.addEventListener('input', calculateItemTotal);
