@@ -1,0 +1,15 @@
+{
+  "name": "gst-invoice-generator",
+  "version": "1.0.0",
+  "description": "A simple GST invoice generator web application.",
+  "main": "src/js/app.js",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'Build step can be added here.'"
+  },
+  "dependencies": {
+    "jspdf": "^2.5.1"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Invoice Generator</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GST Invoice Generator</h1>
+        <form id="invoice-form">
+            <h2>Seller Details</h2>
+            <label for="seller-name">Name:</label>
+            <input type="text" id="seller-name" required>
+            <label for="seller-gst">GST Number:</label>
+            <input type="text" id="seller-gst" required>
+
+            <h2>Buyer Details</h2>
+            <label for="buyer-name">Name:</label>
+            <input type="text" id="buyer-name" required>
+            <label for="buyer-gst">GST Number:</label>
+            <input type="text" id="buyer-gst" required>
+
+            <h2>Invoice Details</h2>
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" required>
+
+            <button type="button" id="generate-invoice">Generate Invoice</button>
+        </form>
+
+        <div id="invoice-output" class="hidden">
+            <h2>Invoice Summary</h2>
+            <p id="invoice-details"></p>
+            <p id="gst-amount"></p>
+            <button id="download-pdf">Download PDF</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/invoice.js"></script>
+    <script src="js/pdf-generator.js"></script>
+</body>
+</html>
