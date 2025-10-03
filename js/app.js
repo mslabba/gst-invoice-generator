@@ -8,12 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
     let itemIndex = 1;
 
     // Add item functionality
-    addItemBtn.addEventListener('click', function () {
+    addItemBtn.addEventListener('click', function (e) {
+        e.preventDefault();
         addNewItem();
     });
 
     // Generate invoice functionality
-    generateBtn.addEventListener('click', function () {
+    generateBtn.addEventListener('click', function (e) {
+        e.preventDefault();
         const invoiceData = collectFormData();
 
         if (!validateFormData(invoiceData)) {
@@ -26,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Download PDF functionality
-    downloadBtn.addEventListener('click', function () {
+    downloadBtn.addEventListener('click', function (e) {
+        e.preventDefault();
         const invoiceData = collectFormData();
         generatePDF(invoiceData);
     });
@@ -122,11 +125,13 @@ function updateTotals() {
         subtotal += parseFloat(totalInput.value) || 0;
     });
 
-    const gstAmount = subtotal * 0.025; // 2.5%
-    const grandTotal = subtotal + gstAmount;
+    const cgstAmount = subtotal * 0.025; // 2.5% CGST
+    const sgstAmount = subtotal * 0.025; // 2.5% SGST
+    const totalGstAmount = cgstAmount + sgstAmount;
+    const grandTotal = subtotal + totalGstAmount;
 
     document.getElementById('subtotal-display').textContent = `₹${subtotal.toFixed(2)}`;
-    document.getElementById('gst-display').textContent = `₹${gstAmount.toFixed(2)}`;
+    document.getElementById('gst-display').textContent = `₹${totalGstAmount.toFixed(2)} (CGST: ₹${cgstAmount.toFixed(2)} + SGST: ₹${sgstAmount.toFixed(2)})`;
     document.getElementById('grand-total-display').textContent = `₹${grandTotal.toFixed(2)}`;
 }
 
@@ -238,8 +243,16 @@ function displayInvoice(invoice) {
                     <span>₹${invoice.subtotal.toFixed(2)}</span>
                 </div>
                 <div class="amount-row">
-                    <span>GST (2.5%):</span>
-                    <span>₹${invoice.gstAmount.toFixed(2)}</span>
+                    <span>CGST (2.5%):</span>
+                    <span>₹${invoice.cgstAmount.toFixed(2)}</span>
+                </div>
+                <div class="amount-row">
+                    <span>SGST (2.5%):</span>
+                    <span>₹${invoice.sgstAmount.toFixed(2)}</span>
+                </div>
+                <div class="amount-row">
+                    <span>Total GST:</span>
+                    <span>₹${invoice.totalGstAmount.toFixed(2)}</span>
                 </div>
                 <div class="amount-row total-amount">
                     <span>Total Amount:</span>

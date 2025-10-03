@@ -158,8 +158,16 @@ function generatePDF(invoiceData) {
                             <td><strong>₹${invoice.subtotal.toFixed(2)}</strong></td>
                         </tr>
                         <tr>
-                            <td>GST (${invoice.gstRate}%):</td>
-                            <td>₹${invoice.gstAmount.toFixed(2)}</td>
+                            <td>CGST (2.5%):</td>
+                            <td>₹${invoice.cgstAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>SGST (2.5%):</td>
+                            <td>₹${invoice.sgstAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total GST:</strong></td>
+                            <td><strong>₹${invoice.totalGstAmount.toFixed(2)}</strong></td>
                         </tr>
                         <tr class="total-row">
                             <td><strong>Grand Total:</strong></td>

@@ -1,5 +1,6 @@
 function generateInvoice(data) {
-    const gstRate = 0.025; // 2.5%
+    const cgstRate = 0.025; // 2.5% CGST
+    const sgstRate = 0.025; // 2.5% SGST
 
     // Calculate totals
     let subtotal = 0;
@@ -7,8 +8,10 @@ function generateInvoice(data) {
         subtotal += item.total;
     });
 
-    const gstAmount = subtotal * gstRate;
-    const totalAmount = subtotal + gstAmount;
+    const cgstAmount = subtotal * cgstRate;
+    const sgstAmount = subtotal * sgstRate;
+    const totalGstAmount = cgstAmount + sgstAmount;
+    const totalAmount = subtotal + totalGstAmount;
 
     // Generate invoice number
     const invoiceNumber = 'INV-' + Date.now().toString().slice(-6);
@@ -23,9 +26,12 @@ function generateInvoice(data) {
         buyer: data.buyer,
         items: data.items,
         subtotal: subtotal,
-        gstAmount: gstAmount,
+        cgstAmount: cgstAmount,
+        sgstAmount: sgstAmount,
+        totalGstAmount: totalGstAmount,
         totalAmount: totalAmount,
-        gstRate: gstRate * 100 // Convert to percentage for display
+        cgstRate: cgstRate * 100, // Convert to percentage for display
+        sgstRate: sgstRate * 100  // Convert to percentage for display
     };
 }
 
@@ -42,6 +48,10 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-function calculateGST(baseAmount, rate = 0.025) {
-    return baseAmount * rate;
+function calculateGST(baseAmount, cgstRate = 0.025, sgstRate = 0.025) {
+    return {
+        cgst: baseAmount * cgstRate,
+        sgst: baseAmount * sgstRate,
+        total: baseAmount * (cgstRate + sgstRate)
+    };
 }
