@@ -1,6 +1,19 @@
 function generatePDF(invoiceData) {
     const invoice = generateInvoice(invoiceData);
 
+    // Create items table HTML
+    let itemsTableHtml = '';
+    invoice.items.forEach(item => {
+        itemsTableHtml += `
+            <tr>
+                <td>${item.description}</td>
+                <td style="text-align: center;">${item.quantity}</td>
+                <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
+                <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
 
@@ -53,6 +66,21 @@ function generatePDF(invoiceData) {
                     margin-bottom: 10px;
                     font-size: 1.1em;
                 }
+                .items-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                .items-table th,
+                .items-table td {
+                    padding: 10px;
+                    text-align: left;
+                    border: 1px solid #ddd;
+                }
+                .items-table th {
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                }
                 .amount-table {
                     width: 100%;
                     border-collapse: collapse;
@@ -97,35 +125,45 @@ function generatePDF(invoiceData) {
                         <div class="seller">
                             <div class="section-title">Seller Details:</div>
                             <p><strong>Name:</strong> ${invoice.seller.name}</p>
-                            <p><strong>GST Number:</strong> ${invoice.seller.gst}</p>
+                            ${invoice.seller.address ? `<p><strong>Address:</strong> ${invoice.seller.address}</p>` : ''}
+                            ${invoice.seller.gst ? `<p><strong>GST Number:</strong> ${invoice.seller.gst}</p>` : ''}
                         </div>
                         <div class="buyer">
                             <div class="section-title">Buyer Details:</div>
                             <p><strong>Name:</strong> ${invoice.buyer.name}</p>
-                            <p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>
+                            ${invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
+                            ${invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
                         </div>
                     </div>
                 </div>
                 
-                <table class="amount-table">
+                <table class="items-table">
                     <thead>
                         <tr>
-                            <th>Description</th>
-                            <th>Amount (₹)</th>
+                            <th>Item Description</th>
+                            <th style="text-align: center;">Quantity</th>
+                            <th style="text-align: right;">Unit Price (₹)</th>
+                            <th style="text-align: right;">Total (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
+                        ${itemsTableHtml}
+                    </tbody>
+                </table>
+                
+                <table class="amount-table">
+                    <tbody>
                         <tr>
-                            <td>Base Amount</td>
-                            <td>${invoice.baseAmount.toFixed(2)}</td>
+                            <td><strong>Subtotal:</strong></td>
+                            <td><strong>₹${invoice.subtotal.toFixed(2)}</strong></td>
                         </tr>
                         <tr>
-                            <td>GST (${invoice.gstRate}%)</td>
-                            <td>${invoice.gstAmount.toFixed(2)}</td>
+                            <td>GST (${invoice.gstRate}%):</td>
+                            <td>₹${invoice.gstAmount.toFixed(2)}</td>
                         </tr>
                         <tr class="total-row">
-                            <td><strong>Total Amount</strong></td>
-                            <td><strong>${invoice.totalAmount.toFixed(2)}</strong></td>
+                            <td><strong>Grand Total:</strong></td>
+                            <td><strong>₹${invoice.totalAmount.toFixed(2)}</strong></td>
                         </tr>
                     </tbody>
                 </table>

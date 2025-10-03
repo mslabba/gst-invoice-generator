@@ -1,44 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GST Invoice Generator</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <div class="container">
         <h1>GST Invoice Generator</h1>
+
         <form id="invoice-form">
             <h2>Seller Details</h2>
-            <label for="seller-name">Name:</label>
+            <label for="seller-name">Seller Name:</label>
             <input type="text" id="seller-name" required>
-            <label for="seller-gst">GST Number:</label>
-            <input type="text" id="seller-gst" required>
+
+            <label for="seller-address">Seller Address:</label>
+            <input type="text" id="seller-address" placeholder="Optional">
+
+            <label for="seller-gst">Seller GST Number:</label>
+            <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
 
             <h2>Buyer Details</h2>
-            <label for="buyer-name">Name:</label>
+            <label for="buyer-name">Buyer Name:</label>
             <input type="text" id="buyer-name" required>
-            <label for="buyer-gst">GST Number:</label>
-            <input type="text" id="buyer-gst" required>
 
-            <h2>Invoice Details</h2>
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" required>
+            <label for="buyer-address">Buyer Address:</label>
+            <input type="text" id="buyer-address" placeholder="Optional">
+
+            <label for="buyer-gst">Buyer GST Number:</label>
+            <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+
+            <h2>Invoice Items</h2>
+            <div id="items-container">
+                <div class="item-row" data-index="0">
+                    <div class="item-fields">
+                        <div class="field-group">
+                            <label>Item Description:</label>
+                            <input type="text" class="item-description" placeholder="Enter item description" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Quantity:</label>
+                            <input type="number" class="item-quantity" min="1" step="0.01" placeholder="1" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Unit Price (₹):</label>
+                            <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
+                        </div>
+                        <div class="field-group">
+                            <label>Total (₹):</label>
+                            <input type="number" class="item-total" readonly>
+                        </div>
+                        <div class="field-group">
+                            <button type="button" class="remove-item-btn" onclick="removeItem(0)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-item-btn">Add Item</button>
+
+            <div class="totals-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal-display">₹0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>GST (2.5%):</span>
+                    <span id="gst-display">₹0.00</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Grand Total:</span>
+                    <span id="grand-total-display">₹0.00</span>
+                </div>
+            </div>
 
             <button type="button" id="generate-invoice">Generate Invoice</button>
         </form>
 
         <div id="invoice-output" class="hidden">
-            <h2>Invoice Summary</h2>
-            <p id="invoice-details"></p>
-            <p id="gst-amount"></p>
+            <div id="invoice-details"></div>
             <button id="download-pdf">Download PDF</button>
         </div>
     </div>
 
-    <script src="js/app.js"></script>
     <script src="js/invoice.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/pdf-generator.js"></script>
 </body>
+
 </html>

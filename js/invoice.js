@@ -1,8 +1,14 @@
 function generateInvoice(data) {
     const gstRate = 0.025; // 2.5%
-    const baseAmount = data.amount;
-    const gstAmount = baseAmount * gstRate;
-    const totalAmount = baseAmount + gstAmount;
+
+    // Calculate totals
+    let subtotal = 0;
+    data.items.forEach(item => {
+        subtotal += item.total;
+    });
+
+    const gstAmount = subtotal * gstRate;
+    const totalAmount = subtotal + gstAmount;
 
     // Generate invoice number
     const invoiceNumber = 'INV-' + Date.now().toString().slice(-6);
@@ -15,7 +21,8 @@ function generateInvoice(data) {
         date: currentDate,
         seller: data.seller,
         buyer: data.buyer,
-        baseAmount: baseAmount,
+        items: data.items,
+        subtotal: subtotal,
         gstAmount: gstAmount,
         totalAmount: totalAmount,
         gstRate: gstRate * 100 // Convert to percentage for display
