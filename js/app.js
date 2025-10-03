@@ -1,3 +1,5 @@
+let itemIndex = 1; // Move this to global scope
+
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('invoice-form');
     const generateBtn = document.getElementById('generate-invoice');
@@ -35,8 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize calculations for the first item
     setupItemCalculations();
 });
-
-let itemIndex = 1;
 
 function addNewItem() {
     const container = document.getElementById('items-container');
