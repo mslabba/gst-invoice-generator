@@ -9,7 +9,19 @@
 </head>
 
 <body>
-    <div class="container">
+    <!-- Auth Required Message (shown when not logged in) -->
+    <div id="auth-required" class="auth-banner">
+        <p>🔒 <strong>Guest Mode:</strong> Your invoices won't be saved. <a href="login.html">Login</a> or <a
+                href="register.html">Register</a> to save your work.</p>
+    </div>
+
+    <div class="container" id="main-content">
+        <!-- User info bar -->
+        <div id="user-info-bar" class="user-bar hidden">
+            <span id="user-info"></span>
+            <button id="auth-button">Login</button>
+        </div>
+
         <h1>GST Invoice Generator</h1>
 
         <form id="invoice-form">
@@ -98,12 +110,17 @@
 
         <div id="invoice-output" class="hidden">
             <div id="invoice-details"></div>
-            <button id="download-pdf">Download PDF</button>
+            <div class="action-buttons">
+                <button id="download-pdf">Download PDF</button>
+                <button id="save-invoice" class="save-btn hidden">Save Invoice</button>
+            </div>
         </div>
     </div>
 
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
     <script src="js/invoice.js"></script>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
     <script src="js/pdf-generator.js"></script>
 </body>
 

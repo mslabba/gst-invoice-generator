@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - GST Invoice Generator</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>GST Invoice Generator</h1>
+      <h2>Login</h2>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" required>
+        </div>
+
+        <button type="submit" id="login-btn">Login</button>
+      </form>
+
+      <div class="auth-links">
+        <a href="#" id="forgot-password">Forgot Password?</a>
+        <p>Don't have an account? <a href="register.html">Register here</a></p>
+        <p><a href="index.html">Continue as Guest</a> (Limited features)</p>
+      </div>
+
+      <div id="message" class="message hidden"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+  <script type="module">
+    import { authManager } from './js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('login-form');
+      const messageDiv = document.getElementById('message');
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        const result = await authManager.login(email, password);
+        showMessage(result.message, result.success ? 'success' : 'error');
+
+        if (result.success) {
+          // Wait for auth state to be properly set before redirecting
+          showMessage('Login successful! Redirecting to dashboard...', 'success');
+          await authManager.waitForAuthState();
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 500);
+        }
+      });
+
+      document.getElementById('forgot-password').addEventListener('click', async function (e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+
+        if (!email) {
+          showMessage('Please enter your email address first', 'error');
+          return;
+        }
+
+        const result = await authManager.resetPassword(email);
+        showMessage(result.message, result.success ? 'success' : 'error');
+      });
+
+      function showMessage(text, type) {
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.classList.remove('hidden');
+
+        setTimeout(() => {
+          messageDiv.classList.add('hidden');
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+
+</html>

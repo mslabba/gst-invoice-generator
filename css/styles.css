@@ -11,6 +11,55 @@ body {
     background-color: #f4f4f4;
 }
 
+/* Auth Banner */
+.auth-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.auth-banner a {
+    color: white;
+    text-decoration: underline;
+}
+
+.auth-banner a:hover {
+    text-decoration: none;
+}
+
+/* User Info Bar */
+.user-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.save-btn {
+    background-color: #27ae60 !important;
+}
+
+.save-btn:hover {
+    background-color: #219a52 !important;
+}
+
+.save-btn:disabled {
+    background-color: #95a5a6 !important;
+    cursor: not-allowed;
+}
+
 .container {
     max-width: 1000px;
     margin: 0 auto;
