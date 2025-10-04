@@ -1,4 +1,7 @@
+import { invoiceStorage } from './invoice-storage.js';
+
 let itemIndex = 1; // Move this to global scope
+let currentInvoice = null; // Store current invoice for saving
 
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('invoice-form');
@@ -6,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadBtn = document.getElementById('download-pdf');
     const invoiceOutput = document.getElementById('invoice-output');
     const addItemBtn = document.getElementById('add-item-btn');
+    const saveInvoiceBtn = document.getElementById('save-invoice');
 
     // Add item functionality
     addItemBtn.addEventListener('click', function (e) {
@@ -23,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const invoice = generateInvoice(invoiceData);
+        currentInvoice = { invoiceData, invoice }; // Store for saving
         displayInvoice(invoice);
         invoiceOutput.classList.remove('hidden');
     });
@@ -33,6 +38,49 @@ document.addEventListener('DOMContentLoaded', function () {
         const invoiceData = collectFormData();
         generatePDF(invoiceData);
     });
+
+    // Save invoice functionality
+    if (saveInvoiceBtn) {
+        saveInvoiceBtn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            console.log('Save button clicked');
+
+            if (!currentInvoice) {
+                alert('Please generate an invoice first');
+                return;
+            }
+
+            console.log('Attempting to save invoice:', currentInvoice.invoice);
+            console.log('Current user:', window.authManager?.currentUser?.email);
+
+            // Show saving message
+            saveInvoiceBtn.textContent = 'Saving...';
+            saveInvoiceBtn.disabled = true;
+
+            try {
+                const result = await invoiceStorage.saveInvoice(currentInvoice.invoice);
+                console.log('Save result:', result);
+
+                if (result.success) {
+                    alert('Invoice saved successfully! ID: ' + result.id);
+                    saveInvoiceBtn.textContent = 'Saved ✓';
+                    setTimeout(() => {
+                        saveInvoiceBtn.textContent = 'Save Invoice';
+                        saveInvoiceBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    alert('Failed to save invoice: ' + result.message);
+                    saveInvoiceBtn.textContent = 'Save Invoice';
+                    saveInvoiceBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error saving invoice:', error);
+                alert('Error saving invoice: ' + error.message);
+                saveInvoiceBtn.textContent = 'Save Invoice';
+                saveInvoiceBtn.disabled = false;
+            }
+        });
+    }
 
     // Initialize calculations for the first item
     setupItemCalculations();

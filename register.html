@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - GST Invoice Generator</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>GST Invoice Generator</h1>
+      <h2>Create Account</h2>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label for="name">Full Name:</label>
+          <input type="text" id="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password:</label>
+          <input type="password" id="confirm-password" required minlength="6">
+        </div>
+
+        <button type="submit" id="register-btn">Create Account</button>
+      </form>
+
+      <div class="auth-links">
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+
+      <div id="message" class="message hidden"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { authManager } from './js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('register-form');
+      const messageDiv = document.getElementById('message');
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (password !== confirmPassword) {
+          showMessage('Passwords do not match', 'error');
+          return;
+        }
+
+        const result = await authManager.register(email, password, name);
+        showMessage(result.message, result.success ? 'success' : 'error');
+
+        if (result.success) {
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        }
+      });
+
+      function showMessage(text, type) {
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.classList.remove('hidden');
+
+        setTimeout(() => {
+          messageDiv.classList.add('hidden');
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+
+</html>

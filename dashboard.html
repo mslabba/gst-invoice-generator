@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - GST Invoice Generator</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1>GST Invoice Generator</h1>
+      <div class="nav-menu">
+        <span id="user-info"></span>
+        <button id="logout-btn">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Loading Dashboard...</p>
+    </div>
+  </div>
+
+  <div class="dashboard-container" id="dashboard-main" style="display: none;">
+    <div class="dashboard-sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" class="menu-item active" data-section="create">Create Invoice</a></li>
+        <li><a href="#" class="menu-item" data-section="saved">Saved Invoices</a></li>
+        <li><a href="#" class="menu-item" data-section="profile">Profile Settings</a></li>
+      </ul>
+    </div>
+
+    <div class="dashboard-content">
+      <!-- Create Invoice Section -->
+      <div id="create-section" class="content-section active">
+        <h2>Create New Invoice</h2>
+        <iframe src="index.html" width="100%" height="800px" frameborder="0"></iframe>
+      </div>
+
+      <!-- Saved Invoices Section -->
+      <div id="saved-section" class="content-section hidden">
+        <h2>Saved Invoices</h2>
+        <div class="invoices-actions">
+          <button id="refresh-invoices" class="secondary-btn">Refresh</button>
+        </div>
+        <div id="saved-invoices-list">
+          <p>Loading saved invoices...</p>
+        </div>
+      </div> <!-- Profile Settings Section -->
+      <div id="profile-section" class="content-section hidden">
+        <h2>Profile Settings</h2>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="display-name">Display Name:</label>
+            <input type="text" id="display-name">
+          </div>
+
+          <div class="form-group">
+            <label for="default-seller-name">Default Seller Name:</label>
+            <input type="text" id="default-seller-name">
+          </div>
+
+          <div class="form-group">
+            <label for="default-seller-address">Default Seller Address:</label>
+            <input type="text" id="default-seller-address">
+          </div>
+
+          <div class="form-group">
+            <label for="default-seller-gst">Default Seller GST:</label>
+            <input type="text" id="default-seller-gst">
+          </div>
+
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { authManager } from './js/auth.js';
+    import { invoiceStorage } from './js/invoice-storage.js';
+
+    let savedInvoices = [];
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      // Wait for auth state to be determined
+      const user = await authManager.waitForAuthState();
+
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Hide loading screen and show dashboard
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('dashboard-main').style.display = 'flex';
+
+      // Logout functionality
+      document.getElementById('logout-btn').addEventListener('click', function () {
+        authManager.logout();
+      });
+
+      // Load saved invoices when the saved section is opened
+      loadSavedInvoices();
+
+      // Refresh invoices button
+      document.getElementById('refresh-invoices').addEventListener('click', function () {
+        loadSavedInvoices();
+      });
+
+      // Sidebar navigation
+      const menuItems = document.querySelectorAll('.menu-item');
+      const contentSections = document.querySelectorAll('.content-section');
+
+      menuItems.forEach(item => {
+        item.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          // Remove active class from all items
+          menuItems.forEach(mi => mi.classList.remove('active'));
+          contentSections.forEach(cs => cs.classList.add('hidden'));
+
+          // Add active class to clicked item
+          this.classList.add('active');
+
+          // Show corresponding section
+          const section = this.dataset.section;
+          document.getElementById(`${section}-section`).classList.remove('hidden');
+
+          // Load invoices if saved section is selected
+          if (section === 'saved') {
+            loadSavedInvoices();
+          }
+        });
+      });
+    });
+
+    async function loadSavedInvoices() {
+      const invoicesList = document.getElementById('saved-invoices-list');
+      invoicesList.innerHTML = '<p>Loading saved invoices...</p>';
+
+      console.log('Loading saved invoices for user:', authManager.currentUser?.email);
+      const result = await invoiceStorage.getUserInvoices();
+      console.log('Invoice load result:', result);
+
+      if (result.success) {
+        savedInvoices = result.invoices;
+        displayInvoices(result.invoices);
+      } else {
+        invoicesList.innerHTML = `<p class="error">Error loading invoices: ${result.message}</p>`;
+      }
+    }
+
+    function displayInvoices(invoices) {
+      const invoicesList = document.getElementById('saved-invoices-list');
+
+      if (invoices.length === 0) {
+        invoicesList.innerHTML = '<p class="no-invoices">No saved invoices found. <a href="index.html">Create your first invoice</a></p>';
+        return;
+      }
+
+      let html = '<div class="invoices-grid">';
+
+      invoices.forEach(invoice => {
+        const date = new Date(invoice.createdAt).toLocaleDateString('en-IN');
+        html += `
+          <div class="invoice-card" data-id="${invoice.id}">
+            <div class="invoice-header">
+              <h3>Invoice #${invoice.invoiceNumber}</h3>
+              <span class="invoice-date">${date}</span>
+            </div>
+            <div class="invoice-details">
+              <p><strong>Seller:</strong> ${invoice.seller.name}</p>
+              <p><strong>Buyer:</strong> ${invoice.buyer.name}</p>
+              <p><strong>Total:</strong> ₹${invoice.totalAmount.toFixed(2)}</p>
+              <p><strong>Items:</strong> ${invoice.items.length}</p>
+            </div>
+            <div class="invoice-actions">
+              <button class="view-btn" onclick="viewInvoice('${invoice.id}')">View</button>
+              <button class="download-btn" onclick="downloadInvoice('${invoice.id}')">Download</button>
+              <button class="delete-btn" onclick="deleteInvoice('${invoice.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      invoicesList.innerHTML = html;
+    }
+
+    // Global functions for invoice actions
+    window.viewInvoice = function (invoiceId) {
+      const invoice = savedInvoices.find(inv => inv.id === invoiceId);
+      if (invoice) {
+        // Open invoice in a new window/modal
+        const newWindow = window.open('', '_blank');
+        newWindow.document.write(generateInvoiceHTML(invoice));
+        newWindow.document.close();
+      }
+    };
+
+    window.downloadInvoice = function (invoiceId) {
+      const invoice = savedInvoices.find(inv => inv.id === invoiceId);
+      if (invoice) {
+        // Use existing PDF generator
+        generateInvoicePDF(invoice);
+      }
+    };
+
+    window.deleteInvoice = async function (invoiceId) {
+      if (confirm('Are you sure you want to delete this invoice?')) {
+        const result = await invoiceStorage.deleteInvoice(invoiceId);
+        if (result.success) {
+          alert('Invoice deleted successfully!');
+          loadSavedInvoices(); // Refresh the list
+        } else {
+          alert('Failed to delete invoice: ' + result.message);
+        }
+      }
+    };
+
+    function generateInvoiceHTML(invoice) {
+      let itemsHtml = '';
+      invoice.items.forEach(item => {
+        itemsHtml += `
+          <tr>
+            <td>${item.description}</td>
+            <td style="text-align: center;">${item.quantity}</td>
+            <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
+            <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Invoice ${invoice.invoiceNumber}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .invoice-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+            .details-section { padding: 15px; background-color: #f8f9fa; border-radius: 4px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+            th { background-color: #f8f9fa; }
+            .totals { text-align: right; margin-top: 20px; }
+            .total-row { margin: 5px 0; }
+            .final-total { font-weight: bold; font-size: 18px; border-top: 1px solid #333; padding-top: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-header">
+            <h1>GST INVOICE</h1>
+            <p>Invoice Number: ${invoice.invoiceNumber}</p>
+            <p>Date: ${invoice.date}</p>
+          </div>
+          
+          <div class="details-grid">
+            <div class="details-section">
+              <h3>Seller Details:</h3>
+              <p><strong>Name:</strong> ${invoice.seller.name}</p>
+              ${invoice.seller.address ? `<p><strong>Address:</strong> ${invoice.seller.address}</p>` : ''}
+              ${invoice.seller.gst ? `<p><strong>GST Number:</strong> ${invoice.seller.gst}</p>` : ''}
+            </div>
+            <div class="details-section">
+              <h3>Buyer Details:</h3>
+              <p><strong>Name:</strong> ${invoice.buyer.name}</p>
+              ${invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
+              ${invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
+            </div>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th style="text-align: center;">Quantity</th>
+                <th style="text-align: right;">Unit Price</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+          
+          <div class="totals">
+            <div class="total-row">Subtotal: ₹${invoice.subtotal.toFixed(2)}</div>
+            <div class="total-row">CGST (2.5%): ₹${invoice.cgstAmount.toFixed(2)}</div>
+            <div class="total-row">SGST (2.5%): ₹${invoice.sgstAmount.toFixed(2)}</div>
+            <div class="total-row final-total">Grand Total: ₹${invoice.totalAmount.toFixed(2)}</div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    function generateInvoicePDF(invoice) {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(generateInvoiceHTML(invoice));
+      printWindow.document.close();
+      printWindow.onload = function () {
+        setTimeout(function () {
+          printWindow.print();
+        }, 500);
+      };
+    }
+  </script>
+</body>
+
+</html>
