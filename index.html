@@ -13,25 +13,41 @@
         <h1>GST Invoice Generator</h1>
 
         <form id="invoice-form">
-            <h2>Seller Details</h2>
-            <label for="seller-name">Seller Name:</label>
-            <input type="text" id="seller-name" required>
+            <div class="details-grid">
+                <div class="details-column">
+                    <h2>Seller Details</h2>
+                    <label for="seller-name">Seller Name:</label>
+                    <input type="text" id="seller-name" required>
 
-            <label for="seller-address">Seller Address:</label>
-            <input type="text" id="seller-address" placeholder="Optional">
+                    <label for="seller-address">Seller Address:</label>
+                    <input type="text" id="seller-address" placeholder="Optional">
 
-            <label for="seller-gst">Seller GST Number:</label>
-            <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+                    <label for="seller-gst">Seller GST Number:</label>
+                    <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
 
-            <h2>Buyer Details</h2>
-            <label for="buyer-name">Buyer Name:</label>
-            <input type="text" id="buyer-name" required>
+                    <label for="seller-logo">Seller Logo:</label>
+                    <input type="file" id="seller-logo" accept="image/*" placeholder="Optional">
+                    <div id="logo-preview" class="logo-preview hidden">
+                        <img id="preview-image" alt="Logo Preview">
+                        <button type="button" id="remove-logo" class="remove-logo-btn">Remove Logo</button>
+                    </div>
 
-            <label for="buyer-address">Buyer Address:</label>
-            <input type="text" id="buyer-address" placeholder="Optional">
+                    <button type="button" id="clear-seller-details" class="clear-details-btn">Clear Saved
+                        Details</button>
+                </div>
 
-            <label for="buyer-gst">Buyer GST Number:</label>
-            <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+                <div class="details-column">
+                    <h2>Buyer Details</h2>
+                    <label for="buyer-name">Buyer Name:</label>
+                    <input type="text" id="buyer-name" required>
+
+                    <label for="buyer-address">Buyer Address:</label>
+                    <input type="text" id="buyer-address" placeholder="Optional">
+
+                    <label for="buyer-gst">Buyer GST Number:</label>
+                    <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+                </div>
+            </div>
 
             <h2>Invoice Items</h2>
             <div id="items-container">

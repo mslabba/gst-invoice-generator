@@ -36,6 +36,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize calculations for the first item
     setupItemCalculations();
+
+    // Load saved seller details
+    loadSavedSellerDetails();
+
+    // Auto-save seller details when they change
+    setupSellerAutoSave();
+
+    // Handle logo upload
+    const logoInput = document.getElementById('seller-logo');
+    const logoPreview = document.getElementById('logo-preview');
+    const previewImage = document.getElementById('preview-image');
+    const removeLogoBtn = document.getElementById('remove-logo');
+
+    logoInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                logoPreview.classList.remove('hidden');
+                // Save logo to localStorage
+                saveSellerDetails();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeLogoBtn.addEventListener('click', function () {
+        logoInput.value = '';
+        previewImage.src = '';
+        logoPreview.classList.add('hidden');
+        // Save updated seller details (without logo)
+        saveSellerDetails();
+    });
+
+    // Clear seller details functionality
+    const clearSellerBtn = document.getElementById('clear-seller-details');
+    clearSellerBtn.addEventListener('click', function () {
+        if (confirm('Are you sure you want to clear all saved seller details? This action cannot be undone.')) {
+            clearSavedSellerDetails();
+        }
+    });
 });
 
 function addNewItem() {
@@ -154,11 +196,16 @@ function collectFormData() {
         }
     });
 
+    // Get logo data
+    const logoPreview = document.getElementById('preview-image');
+    const logoData = logoPreview && !logoPreview.closest('.hidden') ? logoPreview.src : null;
+
     return {
         seller: {
             name: document.getElementById('seller-name').value,
             address: document.getElementById('seller-address').value,
-            gst: document.getElementById('seller-gst').value
+            gst: document.getElementById('seller-gst').value,
+            logo: logoData
         },
         buyer: {
             name: document.getElementById('buyer-name').value,
@@ -206,6 +253,7 @@ function displayInvoice(invoice) {
     detailsElement.innerHTML = `
         <div class="invoice-preview">
             <div class="invoice-header">
+                ${invoice.seller.logo ? `<div class="invoice-logo"><img src="${invoice.seller.logo}" alt="Company Logo"></div>` : ''}
                 <h2>GST INVOICE</h2>
                 <p>Invoice #: ${invoice.invoiceNumber}</p>
                 <p>Date: ${invoice.date}</p>
@@ -265,4 +313,99 @@ function displayInvoice(invoice) {
             </div>
         </div>
     `;
+}
+
+// Local Storage Functions for Seller Details
+function saveSellerDetails() {
+    const sellerData = {
+        name: document.getElementById('seller-name').value,
+        address: document.getElementById('seller-address').value,
+        gst: document.getElementById('seller-gst').value,
+        logo: null
+    };
+
+    // Get logo data if present
+    const previewImage = document.getElementById('preview-image');
+    if (previewImage && previewImage.src && !previewImage.closest('.hidden')) {
+        sellerData.logo = previewImage.src;
+    }
+
+    try {
+        localStorage.setItem('gst-invoice-seller-details', JSON.stringify(sellerData));
+    } catch (error) {
+        console.warn('Could not save seller details to localStorage:', error);
+    }
+}
+
+function loadSavedSellerDetails() {
+    try {
+        const savedData = localStorage.getItem('gst-invoice-seller-details');
+        if (savedData) {
+            const sellerData = JSON.parse(savedData);
+
+            // Fill in the form fields
+            if (sellerData.name) document.getElementById('seller-name').value = sellerData.name;
+            if (sellerData.address) document.getElementById('seller-address').value = sellerData.address;
+            if (sellerData.gst) document.getElementById('seller-gst').value = sellerData.gst;
+
+            // Load logo if present
+            if (sellerData.logo) {
+                const previewImage = document.getElementById('preview-image');
+                const logoPreview = document.getElementById('logo-preview');
+                previewImage.src = sellerData.logo;
+                logoPreview.classList.remove('hidden');
+            }
+        }
+    } catch (error) {
+        console.warn('Could not load seller details from localStorage:', error);
+    }
+}
+
+function setupSellerAutoSave() {
+    const sellerFields = [
+        'seller-name',
+        'seller-address',
+        'seller-gst'
+    ];
+
+    sellerFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', debounce(saveSellerDetails, 500));
+            field.addEventListener('blur', saveSellerDetails);
+        }
+    });
+}
+
+function clearSavedSellerDetails() {
+    try {
+        localStorage.removeItem('gst-invoice-seller-details');
+        // Clear form fields
+        document.getElementById('seller-name').value = '';
+        document.getElementById('seller-address').value = '';
+        document.getElementById('seller-gst').value = '';
+
+        // Clear logo
+        const logoInput = document.getElementById('seller-logo');
+        const previewImage = document.getElementById('preview-image');
+        const logoPreview = document.getElementById('logo-preview');
+        logoInput.value = '';
+        previewImage.src = '';
+        logoPreview.classList.add('hidden');
+    } catch (error) {
+        console.warn('Could not clear seller details from localStorage:', error);
+    }
+}
+
+// Debounce function to prevent excessive saving
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }

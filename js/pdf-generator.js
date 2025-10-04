@@ -38,10 +38,25 @@ function generatePDF(invoiceData) {
                     border-bottom: 2px solid #333;
                     padding-bottom: 20px;
                     margin-bottom: 30px;
+                    position: relative;
                 }
                 .invoice-header h1 {
                     color: #2c3e50;
                     margin: 0;
+                }
+                .invoice-logo {
+                    margin-bottom: 15px;
+                    text-align: center;
+                }
+                .invoice-logo img {
+                    max-height: 80px;
+                    max-width: 200px;
+                    object-fit: contain;
+                    display: block;
+                    margin: 0 auto;
+                    border: none;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
                 }
                 .invoice-details {
                     display: table;
@@ -109,12 +124,20 @@ function generatePDF(invoiceData) {
                 @media print {
                     body { margin: 0; }
                     .no-print { display: none; }
+                    .invoice-logo img {
+                        max-height: 80px;
+                        max-width: 200px;
+                        object-fit: contain;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
                 }
             </style>
         </head>
         <body>
             <div class="invoice-container">
                 <div class="invoice-header">
+                    ${invoice.seller.logo ? `<div class="invoice-logo"><img src="${invoice.seller.logo}" alt="Company Logo"></div>` : ''}
                     <h1>GST INVOICE</h1>
                     <p>Invoice Number: ${invoice.invoiceNumber}</p>
                     <p>Date: ${invoice.date}</p>
@@ -195,9 +218,38 @@ function generatePDF(invoiceData) {
 
     // Auto-print when the content is loaded
     printWindow.onload = function () {
-        setTimeout(function () {
-            printWindow.print();
-        }, 500);
+        // Wait for images to load before printing
+        const images = printWindow.document.images;
+        let imageLoadCount = 0;
+        const totalImages = images.length;
+
+        if (totalImages === 0) {
+            // No images, print immediately
+            setTimeout(function () {
+                printWindow.print();
+            }, 500);
+        } else {
+            // Wait for all images to load
+            for (let i = 0; i < totalImages; i++) {
+                images[i].onload = function () {
+                    imageLoadCount++;
+                    if (imageLoadCount === totalImages) {
+                        setTimeout(function () {
+                            printWindow.print();
+                        }, 1000);
+                    }
+                };
+                // Handle case where image is already loaded
+                if (images[i].complete) {
+                    imageLoadCount++;
+                    if (imageLoadCount === totalImages) {
+                        setTimeout(function () {
+                            printWindow.print();
+                        }, 1000);
+                    }
+                }
+            }
+        }
     };
 }
 

@@ -39,6 +39,21 @@ form {
     margin-bottom: 30px;
 }
 
+/* Two-column layout for seller and buyer details */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.details-column {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
 label {
     display: block;
     margin-bottom: 5px;
@@ -98,6 +113,67 @@ button:hover {
 .remove-item-btn {
     background-color: #e74c3c !important;
     padding: 8px 16px !important;
+}
+
+/* Logo upload styles */
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+}
+
+.logo-preview {
+    margin-bottom: 15px;
+    text-align: center;
+    padding: 15px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.logo-preview img {
+    max-height: 100px;
+    max-width: 200px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.remove-logo-btn {
+    background-color: #e74c3c !important;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.remove-logo-btn:hover {
+    background-color: #c0392b !important;
+}
+
+/* Invoice logo styles */
+.invoice-logo {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.invoice-logo img {
+    max-height: 80px;
+    max-width: 200px;
+    object-fit: contain;
+    border: none;
+}
+
+.hidden {
+    display: none !important;
     font-size: 14px !important;
     margin: 0 !important;
 }
@@ -256,9 +332,79 @@ button:hover {
     margin-top: 10px;
 }
 
+/* Logo upload styles */
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+}
+
+.logo-preview {
+    margin-bottom: 15px;
+    text-align: center;
+    padding: 15px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.logo-preview img {
+    max-height: 100px;
+    max-width: 200px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.remove-logo-btn {
+    background-color: #e74c3c !important;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.remove-logo-btn:hover {
+    background-color: #c0392b !important;
+}
+
+/* Invoice logo styles */
+.invoice-logo {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.invoice-logo img {
+    max-height: 80px;
+    max-width: 200px;
+    object-fit: contain;
+    border: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     .container {
         margin: 10px;
+        padding: 15px;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .details-column {
         padding: 15px;
     }
 
@@ -275,4 +421,36 @@ button:hover {
     .totals-section {
         padding: 15px;
     }
+
+    .logo-preview img {
+        max-height: 80px;
+        max-width: 150px;
+    }
+
+    .invoice-logo img {
+        max-height: 60px;
+        max-width: 150px;
+    }
+
+    .clear-details-btn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
+/* Clear Seller Details Button */
+.clear-details-btn {
+    background-color: #f39c12 !important;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.clear-details-btn:hover {
+    background-color: #e67e22 !important;
 }
