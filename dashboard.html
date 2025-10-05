@@ -40,6 +40,28 @@
       margin: 20px 0 15px 0;
     }
 
+    .seller-buyer-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .seller-section,
+    .buyer-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    @media (max-width: 768px) {
+      .seller-buyer-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
     .item-row {
       border: 1px solid #ddd;
       border-radius: 4px;
@@ -229,43 +251,49 @@
         <h2>Create New Invoice</h2>
 
         <form id="invoice-form">
-          <h3>Seller Details</h3>
-          <div class="form-group">
-            <label for="seller-name">Seller Name:</label>
-            <input type="text" id="seller-name" required>
-          </div>
+          <div class="seller-buyer-container">
+            <div class="seller-section">
+              <h3>Seller Details</h3>
+              <div class="form-group">
+                <label for="seller-name">Seller Name:</label>
+                <input type="text" id="seller-name" required>
+              </div>
 
-          <div class="form-group">
-            <label for="seller-address">Seller Address:</label>
-            <input type="text" id="seller-address" placeholder="Optional">
-          </div>
+              <div class="form-group">
+                <label for="seller-address">Seller Address:</label>
+                <input type="text" id="seller-address" placeholder="Optional">
+              </div>
 
-          <div class="form-group">
-            <label for="seller-gst">Seller GST Number:</label>
-            <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
-          </div>
+              <div class="form-group">
+                <label for="seller-gst">Seller GST Number:</label>
+                <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+              </div>
+            </div>
 
-          <h3>Buyer Details</h3>
-          <div class="buyer-selection">
-            <label for="buyer-select">Select Existing Buyer (Optional):</label>
-            <select id="buyer-select">
-              <option value="">-- Select a buyer or enter new details --</option>
-            </select>
-          </div>
+            <div class="buyer-section">
+              <h3>Buyer Details</h3>
+              <div class="buyer-selection form-group">
+                <label for="buyer-select">Select Existing Buyer (Optional):</label>
+                <select id="buyer-select">
+                  <option value="">-- Select a buyer or enter new details --</option>
+                </select>
+              </div>
 
-          <div class="form-group">
-            <label for="buyer-name">Buyer Name:</label>
-            <input type="text" id="buyer-name" required>
-          </div>
+              <div class="form-group">
+                <label for="buyer-name">Buyer Name:</label>
+                <input type="text" id="buyer-name" required>
+              </div>
 
-          <div class="form-group">
-            <label for="buyer-address">Buyer Address:</label>
-            <input type="text" id="buyer-address" placeholder="Optional">
-          </div>
+              <div class="form-group">
+                <label for="buyer-address">Buyer Address:</label>
+                <input type="text" id="buyer-address" placeholder="Optional">
+              </div>
 
-          <div class="form-group">
-            <label for="buyer-gst">Buyer GST Number:</label>
-            <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+              <div class="form-group">
+                <label for="buyer-gst">Buyer GST Number:</label>
+                <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+              </div>
+            </div>
           </div>
 
           <h3>Invoice Items</h3>
@@ -479,7 +507,7 @@
         invoicesHtml += '</div>';
         invoicesList.innerHTML = invoicesHtml;
       } else if (result.success && result.invoices.length === 0) {
-        invoicesList.innerHTML = '<p>No saved invoices found. <a href="index.html">Create your first invoice</a></p>';
+        invoicesList.innerHTML = '<p>No saved invoices found. <a href="#" onclick="switchToCreateInvoice()">Create your first invoice</a></p>';
       } else {
         invoicesList.innerHTML = '<p>Error loading invoices: ' + result.message + '</p>';
       }
@@ -954,6 +982,23 @@
           }
         }
       });
+    }
+
+    // Function to switch to create invoice section from "create your first invoice" link
+    function switchToCreateInvoice() {
+      // Remove active class from all menu items and sections
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.content-section').forEach(section => section.classList.add('hidden'));
+
+      // Activate create invoice menu item and section
+      const createInvoiceMenuItem = document.querySelector('[data-section="create-invoice-section"]');
+      const createInvoiceSection = document.getElementById('create-invoice-section');
+
+      if (createInvoiceMenuItem) createInvoiceMenuItem.classList.add('active');
+      if (createInvoiceSection) createInvoiceSection.classList.remove('hidden');
+
+      // Initialize the invoice form
+      setTimeout(initializeInvoiceForm, 100);
     }
 
     // Override section switching to initialize invoice form when needed
