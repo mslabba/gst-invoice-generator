@@ -8,6 +8,90 @@
   <link rel="icon" type="image/png" href="assets/images/logo-fav.png">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    /* Invoice form specific styles */
+    #create-invoice-section {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #create-invoice-section .form-group {
+      margin-bottom: 15px;
+    }
+
+    #create-invoice-section .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    #create-invoice-section .form-group input,
+    #create-invoice-section .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #create-invoice-section h3 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+      margin: 20px 0 15px 0;
+    }
+
+    .item-row {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+    }
+
+    .item-fields {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .totals-section {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .grand-total {
+      font-weight: bold;
+      font-size: 1.1em;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-buttons button {
+      flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      .item-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -35,7 +119,7 @@
       <ul class="menu">
         <li><a href="#" class="menu-item active" data-section="saved-invoices">📋 Saved Invoices</a></li>
         <li><a href="#" class="menu-item" data-section="profile-section">⚙️ Profile Settings</a></li>
-        <li><a href="index.html" class="menu-item">📄 Create New Invoice</a></li>
+        <li><a href="#" class="menu-item" data-section="create-invoice-section">📄 Create New Invoice</a></li>
       </ul>
     </div>
 
@@ -139,12 +223,117 @@
           <button type="submit">Update Profile</button>
         </form>
       </div>
+
+      <!-- Create Invoice Section -->
+      <div id="create-invoice-section" class="content-section hidden">
+        <h2>Create New Invoice</h2>
+
+        <form id="invoice-form">
+          <h3>Seller Details</h3>
+          <div class="form-group">
+            <label for="seller-name">Seller Name:</label>
+            <input type="text" id="seller-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="seller-address">Seller Address:</label>
+            <input type="text" id="seller-address" placeholder="Optional">
+          </div>
+
+          <div class="form-group">
+            <label for="seller-gst">Seller GST Number:</label>
+            <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+          </div>
+
+          <h3>Buyer Details</h3>
+          <div class="buyer-selection">
+            <label for="buyer-select">Select Existing Buyer (Optional):</label>
+            <select id="buyer-select">
+              <option value="">-- Select a buyer or enter new details --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-name">Buyer Name:</label>
+            <input type="text" id="buyer-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-address">Buyer Address:</label>
+            <input type="text" id="buyer-address" placeholder="Optional">
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-gst">Buyer GST Number:</label>
+            <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+          </div>
+
+          <h3>Invoice Items</h3>
+          <div id="items-container">
+            <div class="item-row" data-index="0">
+              <div class="item-fields">
+                <div class="field-group">
+                  <label>Item Description:</label>
+                  <input type="text" class="item-description" placeholder="Enter item description" required>
+                </div>
+                <div class="field-group">
+                  <label>Quantity:</label>
+                  <input type="number" class="item-quantity" min="1" step="0.01" placeholder="1" required>
+                </div>
+                <div class="field-group">
+                  <label>Unit Price (₹):</label>
+                  <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+                <div class="field-group">
+                  <label>Total (₹):</label>
+                  <input type="number" class="item-total" readonly>
+                </div>
+                <div class="field-group">
+                  <button type="button" class="remove-item-btn" onclick="removeItem(0)">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="add-item-btn">Add Item</button>
+
+          <div class="totals-section">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span id="subtotal-display">₹0.00</span>
+            </div>
+            <div class="total-row">
+              <span>GST (2.5%):</span>
+              <span id="gst-display">₹0.00</span>
+            </div>
+            <div class="total-row grand-total">
+              <span>Grand Total:</span>
+              <span id="grand-total-display">₹0.00</span>
+            </div>
+          </div>
+
+          <button type="button" id="generate-invoice">Generate Invoice</button>
+        </form>
+
+        <div id="invoice-output" class="hidden">
+          <div id="invoice-details"></div>
+          <div class="action-buttons">
+            <button id="download-pdf">Download PDF</button>
+            <button id="save-invoice" class="save-btn">Save Invoice</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Add invoice-related scripts -->
+  <script src="js/invoice.js"></script>
+  <script src="js/pdf-generator.js"></script>
 
   <script type="module">
     import { authManager } from './js/auth.js';
     import { invoiceStorage } from './js/invoice-storage.js';
+    import { buyerStorage } from './js/buyer-storage.js';
 
     let savedInvoices = [];
 
@@ -598,6 +787,186 @@
         alert('Error saving profile: ' + error.message);
       }
     }
+
+    // Invoice Creation Functionality
+    let itemIndex = 1;
+    let currentInvoice = null;
+
+    // Initialize invoice functionality when create-invoice section becomes visible
+    function initializeInvoiceForm() {
+      const form = document.getElementById('invoice-form');
+      const generateBtn = document.getElementById('generate-invoice');
+      const downloadBtn = document.getElementById('download-pdf');
+      const invoiceOutput = document.getElementById('invoice-output');
+      const addItemBtn = document.getElementById('add-item-btn');
+      const saveInvoiceBtn = document.getElementById('save-invoice');
+
+      if (!form) return; // Form not ready yet
+
+      // Add item functionality
+      if (addItemBtn) {
+        addItemBtn.removeEventListener('click', addNewItemHandler); // Remove existing listener
+        addItemBtn.addEventListener('click', addNewItemHandler);
+      }
+
+      // Generate invoice functionality
+      if (generateBtn) {
+        generateBtn.removeEventListener('click', generateInvoiceHandler);
+        generateBtn.addEventListener('click', generateInvoiceHandler);
+      }
+
+      // Download PDF functionality
+      if (downloadBtn) {
+        downloadBtn.removeEventListener('click', downloadPDFHandler);
+        downloadBtn.addEventListener('click', downloadPDFHandler);
+      }
+
+      // Save invoice functionality
+      if (saveInvoiceBtn) {
+        saveInvoiceBtn.removeEventListener('click', saveInvoiceHandler);
+        saveInvoiceBtn.addEventListener('click', saveInvoiceHandler);
+      }
+
+      // Load buyer data and setup form
+      loadBuyerData();
+      setupItemCalculations();
+    }
+
+    function addNewItemHandler(e) {
+      e.preventDefault();
+      addNewItem();
+    }
+
+    function generateInvoiceHandler(e) {
+      e.preventDefault();
+      const invoiceData = collectFormData();
+
+      if (!validateFormData(invoiceData)) {
+        return;
+      }
+
+      const invoice = generateInvoice(invoiceData);
+      currentInvoice = { invoiceData, invoice };
+      displayInvoice(invoice);
+      document.getElementById('invoice-output').classList.remove('hidden');
+    }
+
+    async function downloadPDFHandler(e) {
+      e.preventDefault();
+      const invoiceData = collectFormData();
+      await generatePDF(invoiceData);
+    }
+
+    async function saveInvoiceHandler(e) {
+      e.preventDefault();
+      console.log('Save button clicked');
+
+      if (!currentInvoice) {
+        alert('Please generate an invoice first');
+        return;
+      }
+
+      if (!authManager.currentUser) {
+        alert('Please login to save invoices');
+        return;
+      }
+
+      try {
+        console.log('Saving invoice...', currentInvoice);
+        const invoiceId = await invoiceStorage.saveInvoice(currentInvoice.invoiceData, currentInvoice.invoice);
+        console.log('Invoice saved with ID:', invoiceId);
+
+        // Save buyer data if it doesn't exist
+        const buyerData = {
+          name: currentInvoice.invoiceData.buyer.name,
+          address: currentInvoice.invoiceData.buyer.address,
+          gst: currentInvoice.invoiceData.buyer.gst
+        };
+
+        if (buyerData.name && authManager?.currentUser) {
+          await buyerStorage.saveBuyer(buyerData);
+        }
+
+        alert('Invoice saved successfully!');
+
+        // Refresh saved invoices list if we're on that tab
+        const savedInvoicesSection = document.getElementById('saved-invoices');
+        if (!savedInvoicesSection.classList.contains('hidden')) {
+          loadSavedInvoices();
+        }
+      } catch (error) {
+        console.error('Error saving invoice:', error);
+        alert('Error saving invoice: ' + error.message);
+      }
+    }
+
+    function loadBuyerData() {
+      const buyerSelect = document.getElementById('buyer-select');
+      if (!buyerSelect || !authManager?.currentUser) {
+        console.log('Cannot load buyer data:', {
+          buyerSelect: !!buyerSelect,
+          currentUser: !!authManager?.currentUser
+        });
+        return;
+      }
+
+      console.log('Loading buyer data...');
+      buyerStorage.getAllBuyers().then(result => {
+        console.log('Buyer data result:', result);
+        buyerSelect.innerHTML = '<option value="">-- Select a buyer or enter new details --</option>';
+
+        if (result.success && result.buyers && Array.isArray(result.buyers)) {
+          result.buyers.forEach(buyer => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify(buyer);
+            option.textContent = `${buyer.name}${buyer.gst ? ` (${buyer.gst})` : ''}`;
+            buyerSelect.appendChild(option);
+          });
+        } else {
+          console.log('No buyers found or error loading buyers:', result);
+        }
+
+        // Remove existing event listener to avoid duplicates
+        buyerSelect.removeEventListener('change', buyerSelectHandler);
+        buyerSelect.addEventListener('change', buyerSelectHandler);
+      }).catch(error => {
+        console.error('Error loading buyers:', error);
+      });
+    }
+
+    function buyerSelectHandler() {
+      if (this.value) {
+        const buyer = JSON.parse(this.value);
+        document.getElementById('buyer-name').value = buyer.name || '';
+        document.getElementById('buyer-address').value = buyer.address || '';
+        document.getElementById('buyer-gst').value = buyer.gst || '';
+      }
+    }
+
+    function setupItemCalculations() {
+      // Add event listeners for item calculations
+      document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('item-quantity') || e.target.classList.contains('item-price')) {
+          const itemRow = e.target.closest('.item-row');
+          if (itemRow) {
+            calculateItemTotal(itemRow);
+            calculateGrandTotal();
+          }
+        }
+      });
+    }
+
+    // Override section switching to initialize invoice form when needed
+    const originalMenuClick = document.querySelector('.menu').addEventListener;
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', function (e) {
+        const section = this.getAttribute('data-section');
+        if (section === 'create-invoice-section') {
+          // Small delay to ensure DOM is updated
+          setTimeout(initializeInvoiceForm, 100);
+        }
+      });
+    });
   </script>
 </body>
 
