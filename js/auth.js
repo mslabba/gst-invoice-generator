@@ -13,10 +13,41 @@ class AuthManager {
   constructor() {
     this.currentUser = null;
     this._authStateReady = false;
-    this.init();
+    this._initialized = false;
+
+    // Initialize after DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.init());
+    } else {
+      // DOM is already ready
+      this.init();
+    }
   }
 
   init() {
+    if (this._initialized) return;
+    this._initialized = true;
+
+    console.log('AuthManager initializing...');
+
+    // Debug: Check what page we're on and what elements exist
+    console.log('Current page URL:', window.location.href);
+    console.log('Page title:', document.title);
+    console.log('All elements with ID:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+
+    // Ensure main content is visible immediately on page load
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      console.log('Found main content, making it visible');
+      mainContent.classList.remove('hidden');
+      mainContent.style.display = 'block';
+    } else {
+      console.log('Main content not found during init');
+      // Try to find any container elements
+      const containers = document.querySelectorAll('.container, [class*="content"], [id*="content"]');
+      console.log('Found container-like elements:', Array.from(containers).map(el => ({ tag: el.tagName, id: el.id, class: el.className })));
+    }
+
     // Listen for auth state changes
     onAuthStateChanged(auth, (user) => {
       console.log('Auth state changed:', user ? 'Logged in' : 'Logged out', user?.email);
@@ -95,24 +126,60 @@ class AuthManager {
   }
 
   updateUI() {
+    console.log('UpdateUI called, current user:', this.currentUser?.email || 'Not logged in');
+    console.log('Current page in updateUI:', window.location.href);
+
     const authButton = document.getElementById('auth-button');
     const userInfo = document.getElementById('user-info');
     const mainContent = document.getElementById('main-content');
     const authRequired = document.getElementById('auth-required');
     const saveInvoiceBtn = document.getElementById('save-invoice');
 
+    console.log('Elements found:', {
+      authButton: !!authButton,
+      userInfo: !!userInfo,
+      mainContent: !!mainContent,
+      authRequired: !!authRequired,
+      saveInvoiceBtn: !!saveInvoiceBtn
+    });
+
+    // Always ensure main content is visible
+    if (mainContent) {
+      mainContent.classList.remove('hidden');
+      mainContent.style.display = 'block';
+      mainContent.style.visibility = 'visible';
+      console.log('Main content made visible, current styles:', {
+        display: mainContent.style.display,
+        visibility: mainContent.style.visibility,
+        classes: mainContent.className
+      });
+    } else {
+      console.error('Main content element not found!');
+      // Try to make any content visible
+      const containers = document.querySelectorAll('.container, form, main');
+      console.log('Trying to make these containers visible:', containers);
+      containers.forEach(container => {
+        container.style.display = 'block';
+        container.style.visibility = 'visible';
+        container.classList.remove('hidden');
+      });
+    }
+
     if (this.currentUser) {
       // User is logged in
+      console.log('Updating UI for logged in user');
       if (authButton) authButton.textContent = 'Logout';
       if (userInfo) userInfo.textContent = `Welcome, ${this.currentUser.email}`;
-      if (mainContent) mainContent.classList.remove('hidden');
       if (authRequired) authRequired.classList.add('hidden');
       if (saveInvoiceBtn) saveInvoiceBtn.classList.remove('hidden');
+
+      // Load default seller data
+      this.loadDefaultSellerData();
     } else {
       // User is not logged in
+      console.log('Updating UI for guest user');
       if (authButton) authButton.textContent = 'Login';
       if (userInfo) userInfo.textContent = '';
-      if (mainContent) mainContent.classList.remove('hidden'); // Allow guest access
       if (authRequired) authRequired.classList.remove('hidden');
       if (saveInvoiceBtn) saveInvoiceBtn.classList.add('hidden');
     }
@@ -157,6 +224,42 @@ class AuthManager {
       'auth/too-many-requests': 'Too many failed attempts. Try again later'
     };
     return errorMessages[errorCode] || 'An error occurred. Please try again.';
+  }
+
+  async loadDefaultSellerData() {
+    try {
+      const profile = await this.getUserProfile(this.currentUser.uid);
+      if (profile) {
+        const sellerName = document.getElementById('seller-name');
+        const sellerAddress = document.getElementById('seller-address');
+        const sellerGst = document.getElementById('seller-gst');
+
+        if (sellerName && !sellerName.value) sellerName.value = profile.defaultSellerName || '';
+        if (sellerAddress && !sellerAddress.value) sellerAddress.value = profile.defaultSellerAddress || '';
+        if (sellerGst && !sellerGst.value) sellerGst.value = profile.defaultSellerGst || '';
+
+        // Update logo in app header if custom logo exists
+        const appLogo = document.querySelector('.app-logo');
+        if (appLogo && profile.companyLogo) {
+          appLogo.src = profile.companyLogo;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading default seller data:', error);
+    }
+  }
+
+  // Get current user's company logo
+  async getCompanyLogo() {
+    try {
+      if (!this.currentUser) return 'assets/images/logo.png';
+
+      const profile = await this.getUserProfile(this.currentUser.uid);
+      return profile?.companyLogo || 'assets/images/logo.png';
+    } catch (error) {
+      console.error('Error getting company logo:', error);
+      return 'assets/images/logo.png';
+    }
   }
 }
 

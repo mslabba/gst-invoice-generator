@@ -60,6 +60,68 @@ body {
     cursor: not-allowed;
 }
 
+/* Logo Upload Styles */
+.logo-preview {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.logo-preview img {
+    max-width: 200px;
+    max-height: 100px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.remove-logo-btn {
+    background-color: #e74c3c !important;
+    color: white;
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+}
+
+.remove-logo-btn:hover {
+    background-color: #c0392b !important;
+}
+
+/* Profile Tabs */
+.profile-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    background: none !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    cursor: pointer;
+    color: #666 !important;
+    border-bottom: 2px solid transparent !important;
+    margin: 0 !important;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    color: #3498db !important;
+    border-bottom-color: #3498db !important;
+}
+
+.tab-btn:hover {
+    color: #3498db !important;
+    background: none !important;
+}
+
+.tab-content {
+    display: block;
+}
+
+.tab-content.hidden {
+    display: none;
+}
+
 .container {
     max-width: 1000px;
     margin: 0 auto;
@@ -70,12 +132,26 @@ body {
     margin-top: 20px;
 }
 
-h1 {
+/* App Header */
+.app-header {
     text-align: center;
-    color: #2c3e50;
     margin-bottom: 30px;
     padding-bottom: 10px;
     border-bottom: 2px solid #3498db;
+}
+
+.app-logo {
+    height: 60px;
+    width: auto;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1 {
+    color: #2c3e50;
+    margin: 10px 0 0 0;
 }
 
 h2 {
@@ -96,13 +172,22 @@ label {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
+}
+
+.buyer-selection {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
 }
 
 input[type="text"]:focus,

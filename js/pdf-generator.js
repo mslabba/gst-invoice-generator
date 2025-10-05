@@ -1,5 +1,8 @@
-function generatePDF(invoiceData) {
+async function generatePDF(invoiceData) {
     const invoice = generateInvoice(invoiceData);
+
+    // Get company logo
+    const logoUrl = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
 
     // Create items table HTML
     let itemsTableHtml = '';
@@ -28,6 +31,7 @@ function generatePDF(invoiceData) {
                     margin: 0;
                     padding: 20px;
                     color: #333;
+                    line-height: 1.4;
                 }
                 .invoice-container {
                     max-width: 800px;
@@ -41,7 +45,12 @@ function generatePDF(invoiceData) {
                 }
                 .invoice-header h1 {
                     color: #2c3e50;
-                    margin: 0;
+                    margin: 10px 0 0 0;
+                }
+                .invoice-logo {
+                    height: 60px;
+                    width: auto;
+                    margin-bottom: 10px;
                 }
                 .invoice-details {
                     display: table;
@@ -107,14 +116,33 @@ function generatePDF(invoiceData) {
                     color: #666;
                 }
                 @media print {
-                    body { margin: 0; }
+                    body { 
+                        margin: 0; 
+                        line-height: 1.4 !important;
+                    }
                     .no-print { display: none; }
+                    .invoice-container { 
+                        line-height: 1.4 !important; 
+                    }
+                    .items-table td, .items-table th {
+                        line-height: 1.4 !important;
+                        padding: 8px !important;
+                    }
+                    .amount-table td, .amount-table th {
+                        line-height: 1.4 !important;
+                        padding: 8px !important;
+                    }
+                    div[style*="page-break-inside: avoid"] {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
                 }
             </style>
         </head>
         <body>
             <div class="invoice-container">
                 <div class="invoice-header">
+                    <img src="${logoUrl}" alt="Logo" class="invoice-logo">
                     <h1>GST INVOICE</h1>
                     <p>Invoice Number: ${invoice.invoiceNumber}</p>
                     <p>Date: ${invoice.date}</p>
@@ -176,6 +204,8 @@ function generatePDF(invoiceData) {
                     </tbody>
                 </table>
                 
+                ${await getBankingDetailsForPDF()}
+                
                 <div class="footer">
                     <p>Generated on ${new Date().toLocaleString('en-IN')}</p>
                     <p>This is a computer generated invoice.</p>
@@ -201,23 +231,53 @@ function generatePDF(invoiceData) {
     };
 }
 
-document.getElementById("download-btn").addEventListener("click", () => {
-    const invoiceData = {
-        buyer: {
-            name: document.getElementById("buyer-name").value,
-            gst: document.getElementById("buyer-gst").value
-        },
-        seller: {
-            name: document.getElementById("seller-name").value,
-            gst: document.getElementById("seller-gst").value
-        },
-        items: [
-            { description: "Sample Item 1", amount: 100 },
-            { description: "Sample Item 2", amount: 200 }
-        ],
-        totalAmount: 300,
-        gstAmount: 7.5 // 2.5% of 300
-    };
+async function getBankingDetailsForPDF() {
+    try {
+        if (!window.authManager?.currentUser) return '';
 
-    generatePDF(invoiceData);
-});
+        const profile = await window.authManager.getUserProfile(window.authManager.currentUser.uid);
+        if (!profile?.banking && !profile?.upiQrCode) return '';
+
+        let bankingHtml = `
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd; page-break-inside: avoid;">
+                <h3 style="color: #2c3e50; margin-bottom: 12px; line-height: 1.3;">Payment Details:</h3>
+        `;
+
+        if (profile.banking) {
+            const banking = profile.banking;
+            bankingHtml += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">';
+
+            bankingHtml += '<div>';
+            if (banking.bankName) bankingHtml += `<p><strong>Bank:</strong> ${banking.bankName}</p>`;
+            if (banking.accountHolder) bankingHtml += `<p><strong>Account Holder:</strong> ${banking.accountHolder}</p>`;
+            if (banking.accountNumber) bankingHtml += `<p><strong>Account Number:</strong> ${banking.accountNumber}</p>`;
+            bankingHtml += '</div>';
+
+            bankingHtml += '<div>';
+            if (banking.ifscCode) bankingHtml += `<p><strong>IFSC Code:</strong> ${banking.ifscCode}</p>`;
+            if (banking.branchName) bankingHtml += `<p><strong>Branch:</strong> ${banking.branchName}</p>`;
+            if (banking.upiId) bankingHtml += `<p><strong>UPI ID:</strong> ${banking.upiId}</p>`;
+            bankingHtml += '</div>';
+
+            bankingHtml += '</div>';
+        }
+
+        if (profile.upiQrCode) {
+            bankingHtml += `
+                <div style="text-align: center; margin-top: 15px; page-break-inside: avoid;">
+                    <p style="margin-bottom: 8px;"><strong>Scan to Pay:</strong></p>
+                    <img src="${profile.upiQrCode}" alt="UPI QR Code" style="height: 100px; width: 100px; border: 1px solid #ddd; display: inline-block;">
+                </div>
+            `;
+        }
+
+        bankingHtml += '</div>';
+        return bankingHtml;
+    } catch (error) {
+        console.error('Error getting banking details for PDF:', error);
+        return '';
+    }
+}
+
+// PDF generator functions are available globally
+// Event listeners are handled in individual pages (index.html and dashboard.html)

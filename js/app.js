@@ -1,4 +1,5 @@
 import { invoiceStorage } from './invoice-storage.js';
+import { buyerStorage } from './buyer-storage.js';
 
 let itemIndex = 1; // Move this to global scope
 let currentInvoice = null; // Store current invoice for saving
@@ -33,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Download PDF functionality
-    downloadBtn.addEventListener('click', function (e) {
+    downloadBtn.addEventListener('click', async function (e) {
         e.preventDefault();
         const invoiceData = collectFormData();
-        generatePDF(invoiceData);
+        await generatePDF(invoiceData);
     });
 
     // Save invoice functionality
@@ -84,6 +85,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize calculations for the first item
     setupItemCalculations();
+
+    // Initialize buyer functionality
+    initializeBuyerFunctionality();
 });
 
 function addNewItem() {
@@ -313,4 +317,72 @@ function displayInvoice(invoice) {
             </div>
         </div>
     `;
+}
+
+// Buyer functionality
+async function initializeBuyerFunctionality() {
+    const buyerSelect = document.getElementById('buyer-select');
+    const buyerNameInput = document.getElementById('buyer-name');
+    const buyerAddressInput = document.getElementById('buyer-address');
+    const buyerGstInput = document.getElementById('buyer-gst');
+
+    // Load existing buyers
+    await loadBuyers();
+
+    // Handle buyer selection
+    buyerSelect.addEventListener('change', function () {
+        const selectedValue = this.value;
+        if (selectedValue) {
+            const buyerData = JSON.parse(selectedValue);
+            buyerNameInput.value = buyerData.name || '';
+            buyerAddressInput.value = buyerData.address || '';
+            buyerGstInput.value = buyerData.gst || '';
+        }
+    });
+
+    // Auto-save buyer when GST is entered/changed
+    buyerGstInput.addEventListener('blur', async function () {
+        const gst = this.value.trim();
+        if (gst && window.authManager?.currentUser) {
+            // Check if buyer exists
+            const existingBuyer = await buyerStorage.getBuyerByGST(gst);
+            if (existingBuyer) {
+                // Populate fields with existing data
+                buyerNameInput.value = existingBuyer.name || '';
+                buyerAddressInput.value = existingBuyer.address || '';
+            }
+        }
+    });
+
+    // Save buyer when form is generated
+    document.getElementById('generate-invoice').addEventListener('click', async function () {
+        const buyerData = {
+            name: buyerNameInput.value.trim(),
+            address: buyerAddressInput.value.trim(),
+            gst: buyerGstInput.value.trim()
+        };
+
+        if (buyerData.name && window.authManager?.currentUser) {
+            await buyerStorage.saveBuyer(buyerData);
+            await loadBuyers(); // Refresh the dropdown
+        }
+    });
+}
+
+async function loadBuyers() {
+    const buyerSelect = document.getElementById('buyer-select');
+    if (!buyerSelect || !window.authManager?.currentUser) return;
+
+    const result = await buyerStorage.getAllBuyers();
+    if (result.success) {
+        // Clear existing options except the first one
+        buyerSelect.innerHTML = '<option value="">-- Select a buyer or enter new details --</option>';
+
+        result.buyers.forEach(buyer => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify(buyer);
+            option.textContent = `${buyer.name}${buyer.gst ? ` (${buyer.gst})` : ''}`;
+            buyerSelect.appendChild(option);
+        });
+    }
 }
