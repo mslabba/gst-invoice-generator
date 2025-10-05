@@ -5,8 +5,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - GST Invoice Generator</title>
+  <link rel="icon" type="image/png" href="assets/images/logo-fav.png">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    /* Invoice form specific styles */
+    #create-invoice-section {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #create-invoice-section .form-group {
+      margin-bottom: 15px;
+    }
+
+    #create-invoice-section .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    #create-invoice-section .form-group input,
+    #create-invoice-section .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #create-invoice-section h3 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+      margin: 20px 0 15px 0;
+    }
+
+    .item-row {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+    }
+
+    .item-fields {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .totals-section {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .grand-total {
+      font-weight: bold;
+      font-size: 1.1em;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-buttons button {
+      flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      .item-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -28,24 +113,19 @@
     </div>
   </div>
 
-  <div class="dashboard-container" id="dashboard-main" style="display: none;">
-    <div class="dashboard-sidebar">
-      <ul class="sidebar-menu">
-        <li><a href="#" class="menu-item active" data-section="create">Create Invoice</a></li>
-        <li><a href="#" class="menu-item" data-section="saved">Saved Invoices</a></li>
-        <li><a href="#" class="menu-item" data-section="profile">Profile Settings</a></li>
+  <!-- Main Dashboard -->
+  <div id="dashboard-main" class="dashboard-container" style="display: none;">
+    <div class="sidebar">
+      <ul class="menu">
+        <li><a href="#" class="menu-item active" data-section="saved-invoices">📋 Saved Invoices</a></li>
+        <li><a href="#" class="menu-item" data-section="profile-section">⚙️ Profile Settings</a></li>
+        <li><a href="#" class="menu-item" data-section="create-invoice-section">📄 Create New Invoice</a></li>
       </ul>
     </div>
 
-    <div class="dashboard-content">
-      <!-- Create Invoice Section -->
-      <div id="create-section" class="content-section active">
-        <h2>Create New Invoice</h2>
-        <iframe src="index.html" width="100%" height="800px" frameborder="0"></iframe>
-      </div>
-
+    <div class="main-content">
       <!-- Saved Invoices Section -->
-      <div id="saved-section" class="content-section hidden">
+      <div id="saved-invoices" class="content-section">
         <h2>Saved Invoices</h2>
         <div class="invoices-actions">
           <button id="refresh-invoices" class="secondary-btn">Refresh</button>
@@ -53,41 +133,241 @@
         <div id="saved-invoices-list">
           <p>Loading saved invoices...</p>
         </div>
-      </div> <!-- Profile Settings Section -->
+      </div>
+
+      <!-- Profile Settings Section -->
       <div id="profile-section" class="content-section hidden">
         <h2>Profile Settings</h2>
+
+        <!-- Profile Tabs -->
+        <div class="profile-tabs">
+          <button type="button" class="tab-btn active" data-tab="company-tab">Company Details</button>
+          <button type="button" class="tab-btn" data-tab="banking-tab">Banking & Payment</button>
+        </div>
+
         <form id="profile-form">
-          <div class="form-group">
-            <label for="display-name">Display Name:</label>
-            <input type="text" id="display-name">
+          <!-- Company Details Tab -->
+          <div id="company-tab" class="tab-content active">
+            <div class="form-group">
+              <label for="display-name">Display Name:</label>
+              <input type="text" id="display-name">
+            </div>
+
+            <div class="form-group">
+              <label for="default-seller-name">Default Seller Name:</label>
+              <input type="text" id="default-seller-name">
+            </div>
+
+            <div class="form-group">
+              <label for="default-seller-address">Default Seller Address:</label>
+              <input type="text" id="default-seller-address">
+            </div>
+
+            <div class="form-group">
+              <label for="default-seller-gst">Default Seller GST:</label>
+              <input type="text" id="default-seller-gst">
+            </div>
+
+            <div class="form-group">
+              <label for="company-logo">Company Logo:</label>
+              <input type="file" id="company-logo" accept="image/*">
+              <div id="logo-preview" class="logo-preview hidden">
+                <img id="logo-preview-img" src="" alt="Logo Preview">
+                <button type="button" id="remove-logo" class="remove-logo-btn">Remove Logo</button>
+              </div>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="default-seller-name">Default Seller Name:</label>
-            <input type="text" id="default-seller-name">
-          </div>
+          <!-- Banking Details Tab -->
+          <div id="banking-tab" class="tab-content hidden">
+            <div class="form-group">
+              <label for="bank-name">Bank Name:</label>
+              <input type="text" id="bank-name" placeholder="e.g., State Bank of India">
+            </div>
 
-          <div class="form-group">
-            <label for="default-seller-address">Default Seller Address:</label>
-            <input type="text" id="default-seller-address">
-          </div>
+            <div class="form-group">
+              <label for="account-holder">Account Holder Name:</label>
+              <input type="text" id="account-holder" placeholder="Account holder name">
+            </div>
 
-          <div class="form-group">
-            <label for="default-seller-gst">Default Seller GST:</label>
-            <input type="text" id="default-seller-gst">
+            <div class="form-group">
+              <label for="account-number">Account Number:</label>
+              <input type="text" id="account-number" placeholder="Account number">
+            </div>
+
+            <div class="form-group">
+              <label for="ifsc-code">IFSC Code:</label>
+              <input type="text" id="ifsc-code" placeholder="e.g., SBIN0001234">
+            </div>
+
+            <div class="form-group">
+              <label for="branch-name">Branch Name:</label>
+              <input type="text" id="branch-name" placeholder="Branch name">
+            </div>
+
+            <div class="form-group">
+              <label for="upi-id">UPI ID:</label>
+              <input type="text" id="upi-id" placeholder="e.g., yourname@paytm">
+            </div>
+
+            <div class="form-group">
+              <label for="upi-qr-code">UPI QR Code:</label>
+              <input type="file" id="upi-qr-code" accept="image/*">
+              <div id="qr-preview" class="logo-preview hidden">
+                <img id="qr-preview-img" src="" alt="QR Code Preview">
+                <button type="button" id="remove-qr" class="remove-logo-btn">Remove QR Code</button>
+              </div>
+            </div>
           </div>
 
           <button type="submit">Update Profile</button>
         </form>
       </div>
+
+      <!-- Create Invoice Section -->
+      <div id="create-invoice-section" class="content-section hidden">
+        <h2>Create New Invoice</h2>
+
+        <form id="invoice-form">
+          <h3>Seller Details</h3>
+          <div class="form-group">
+            <label for="seller-name">Seller Name:</label>
+            <input type="text" id="seller-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="seller-address">Seller Address:</label>
+            <input type="text" id="seller-address" placeholder="Optional">
+          </div>
+
+          <div class="form-group">
+            <label for="seller-gst">Seller GST Number:</label>
+            <input type="text" id="seller-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+          </div>
+
+          <h3>Buyer Details</h3>
+          <div class="buyer-selection">
+            <label for="buyer-select">Select Existing Buyer (Optional):</label>
+            <select id="buyer-select">
+              <option value="">-- Select a buyer or enter new details --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-name">Buyer Name:</label>
+            <input type="text" id="buyer-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-address">Buyer Address:</label>
+            <input type="text" id="buyer-address" placeholder="Optional">
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-gst">Buyer GST Number:</label>
+            <input type="text" id="buyer-gst" placeholder="Optional (e.g., 22AAAAA0000A1Z5)">
+          </div>
+
+          <h3>Invoice Items</h3>
+          <div id="items-container">
+            <div class="item-row" data-index="0">
+              <div class="item-fields">
+                <div class="field-group">
+                  <label>Item Description:</label>
+                  <input type="text" class="item-description" placeholder="Enter item description" required>
+                </div>
+                <div class="field-group">
+                  <label>Quantity:</label>
+                  <input type="number" class="item-quantity" min="1" step="0.01" placeholder="1" required>
+                </div>
+                <div class="field-group">
+                  <label>Unit Price (₹):</label>
+                  <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+                <div class="field-group">
+                  <label>Total (₹):</label>
+                  <input type="number" class="item-total" readonly>
+                </div>
+                <div class="field-group">
+                  <button type="button" class="remove-item-btn" onclick="removeItem(0)">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="add-item-btn">Add Item</button>
+
+          <div class="totals-section">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span id="subtotal-display">₹0.00</span>
+            </div>
+            <div class="total-row">
+              <span>GST (2.5%):</span>
+              <span id="gst-display">₹0.00</span>
+            </div>
+            <div class="total-row grand-total">
+              <span>Grand Total:</span>
+              <span id="grand-total-display">₹0.00</span>
+            </div>
+          </div>
+
+          <button type="button" id="generate-invoice">Generate Invoice</button>
+        </form>
+
+        <div id="invoice-output" class="hidden">
+          <div id="invoice-details"></div>
+          <div class="action-buttons">
+            <button id="download-pdf">Download PDF</button>
+            <button id="save-invoice" class="save-btn">Save Invoice</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Add invoice-related scripts -->
+  <script src="js/invoice.js"></script>
+  <script src="js/pdf-generator.js"></script>
 
   <script type="module">
     import { authManager } from './js/auth.js';
     import { invoiceStorage } from './js/invoice-storage.js';
+    import { buyerStorage } from './js/buyer-storage.js';
 
     let savedInvoices = [];
+
+    // Global functions used by inline onclick handlers
+    window.viewInvoice = async function (invoiceId) {
+      const invoice = savedInvoices.find(inv => inv.id === invoiceId);
+      if (invoice) {
+        // Open invoice in a new window/modal
+        const newWindow = window.open('', '_blank');
+        const htmlContent = await generateInvoiceHTML(invoice);
+        newWindow.document.write(htmlContent);
+        newWindow.document.close();
+      }
+    };
+
+    window.downloadInvoice = async function (invoiceId) {
+      const invoice = savedInvoices.find(inv => inv.id === invoiceId);
+      if (invoice) {
+        // Use existing PDF generator
+        await generateInvoicePDF(invoice);
+      }
+    };
+
+    window.deleteInvoice = async function (invoiceId) {
+      if (confirm('Are you sure you want to delete this invoice?')) {
+        const result = await invoiceStorage.deleteInvoice(invoiceId);
+        if (result.success) {
+          alert('Invoice deleted successfully!');
+          loadSavedInvoices(); // Refresh the list
+        } else {
+          alert('Failed to delete invoice: ' + result.message);
+        }
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', async function () {
       // Wait for auth state to be determined
@@ -101,6 +381,21 @@
       // Hide loading screen and show dashboard
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('dashboard-main').style.display = 'flex';
+
+      // Tab functionality
+      initTabFunctionality();
+
+      // Logo and QR code preview functionality
+      initImagePreview();
+
+      // Load profile data
+      loadProfileData();
+
+      // Profile form submission
+      document.getElementById('profile-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        await saveProfileData();
+      });
 
       // Logout functionality
       document.getElementById('logout-btn').addEventListener('click', function () {
@@ -121,6 +416,14 @@
 
       menuItems.forEach(item => {
         item.addEventListener('click', function (e) {
+          // Only prevent default for items with data-section (dashboard tabs)
+          // Allow normal navigation for external links like "Create New Invoice"
+          const section = this.getAttribute('data-section');
+          if (!section) {
+            // This is an external link, allow normal navigation
+            return;
+          }
+
           e.preventDefault();
 
           // Remove active class from all items
@@ -130,13 +433,15 @@
           // Add active class to clicked item
           this.classList.add('active');
 
-          // Show corresponding section
-          const section = this.dataset.section;
-          document.getElementById(`${section}-section`).classList.remove('hidden');
+          // Show corresponding content section
+          const targetSection = document.getElementById(section);
+          if (targetSection) {
+            targetSection.classList.remove('hidden');
 
-          // Load invoices if saved section is selected
-          if (section === 'saved') {
-            loadSavedInvoices();
+            // If switching to profile section, load the data
+            if (section === 'profile-section') {
+              loadProfileData();
+            }
           }
         });
       });
@@ -144,89 +449,46 @@
 
     async function loadSavedInvoices() {
       const invoicesList = document.getElementById('saved-invoices-list');
-      invoicesList.innerHTML = '<p>Loading saved invoices...</p>';
+      invoicesList.innerHTML = '<p>Loading...</p>';
 
-      console.log('Loading saved invoices for user:', authManager.currentUser?.email);
       const result = await invoiceStorage.getUserInvoices();
-      console.log('Invoice load result:', result);
-
-      if (result.success) {
+      if (result.success && result.invoices.length > 0) {
         savedInvoices = result.invoices;
-        displayInvoices(result.invoices);
+        let invoicesHtml = '<div class="invoices-grid">';
+
+        result.invoices.forEach(invoice => {
+          invoicesHtml += `
+            <div class="invoice-card">
+              <div class="invoice-header">
+                <h3>Invoice #${invoice.invoiceNumber}</h3>
+                <span class="invoice-date">${invoice.date}</span>
+              </div>
+              <div class="invoice-details">
+                <p><strong>Buyer:</strong> ${invoice.buyer.name}</p>
+                <p><strong>Amount:</strong> ₹${invoice.totalAmount.toFixed(2)}</p>
+              </div>
+              <div class="invoice-actions">
+                <button class="view-btn" onclick="viewInvoice('${invoice.id}')">View</button>
+                <button class="download-btn" onclick="downloadInvoice('${invoice.id}')">Download</button>
+                <button class="delete-btn" onclick="deleteInvoice('${invoice.id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        });
+
+        invoicesHtml += '</div>';
+        invoicesList.innerHTML = invoicesHtml;
+      } else if (result.success && result.invoices.length === 0) {
+        invoicesList.innerHTML = '<p>No saved invoices found. <a href="index.html">Create your first invoice</a></p>';
       } else {
-        invoicesList.innerHTML = `<p class="error">Error loading invoices: ${result.message}</p>`;
+        invoicesList.innerHTML = '<p>Error loading invoices: ' + result.message + '</p>';
       }
     }
 
-    function displayInvoices(invoices) {
-      const invoicesList = document.getElementById('saved-invoices-list');
+    async function generateInvoiceHTML(invoice) {
+      // Get company logo
+      const logoUrl = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
 
-      if (invoices.length === 0) {
-        invoicesList.innerHTML = '<p class="no-invoices">No saved invoices found. <a href="index.html">Create your first invoice</a></p>';
-        return;
-      }
-
-      let html = '<div class="invoices-grid">';
-
-      invoices.forEach(invoice => {
-        const date = new Date(invoice.createdAt).toLocaleDateString('en-IN');
-        html += `
-          <div class="invoice-card" data-id="${invoice.id}">
-            <div class="invoice-header">
-              <h3>Invoice #${invoice.invoiceNumber}</h3>
-              <span class="invoice-date">${date}</span>
-            </div>
-            <div class="invoice-details">
-              <p><strong>Seller:</strong> ${invoice.seller.name}</p>
-              <p><strong>Buyer:</strong> ${invoice.buyer.name}</p>
-              <p><strong>Total:</strong> ₹${invoice.totalAmount.toFixed(2)}</p>
-              <p><strong>Items:</strong> ${invoice.items.length}</p>
-            </div>
-            <div class="invoice-actions">
-              <button class="view-btn" onclick="viewInvoice('${invoice.id}')">View</button>
-              <button class="download-btn" onclick="downloadInvoice('${invoice.id}')">Download</button>
-              <button class="delete-btn" onclick="deleteInvoice('${invoice.id}')">Delete</button>
-            </div>
-          </div>
-        `;
-      });
-
-      html += '</div>';
-      invoicesList.innerHTML = html;
-    }
-
-    // Global functions for invoice actions
-    window.viewInvoice = function (invoiceId) {
-      const invoice = savedInvoices.find(inv => inv.id === invoiceId);
-      if (invoice) {
-        // Open invoice in a new window/modal
-        const newWindow = window.open('', '_blank');
-        newWindow.document.write(generateInvoiceHTML(invoice));
-        newWindow.document.close();
-      }
-    };
-
-    window.downloadInvoice = function (invoiceId) {
-      const invoice = savedInvoices.find(inv => inv.id === invoiceId);
-      if (invoice) {
-        // Use existing PDF generator
-        generateInvoicePDF(invoice);
-      }
-    };
-
-    window.deleteInvoice = async function (invoiceId) {
-      if (confirm('Are you sure you want to delete this invoice?')) {
-        const result = await invoiceStorage.deleteInvoice(invoiceId);
-        if (result.success) {
-          alert('Invoice deleted successfully!');
-          loadSavedInvoices(); // Refresh the list
-        } else {
-          alert('Failed to delete invoice: ' + result.message);
-        }
-      }
-    };
-
-    function generateInvoiceHTML(invoice) {
       let itemsHtml = '';
       invoice.items.forEach(item => {
         itemsHtml += `
@@ -245,8 +507,9 @@
         <head>
           <title>Invoice ${invoice.invoiceNumber}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
+            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
             .invoice-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .invoice-logo { height: 60px; width: auto; margin-bottom: 10px; }
             .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
             .details-section { padding: 15px; background-color: #f8f9fa; border-radius: 4px; }
             table { width: 100%; border-collapse: collapse; margin: 20px 0; }
@@ -255,10 +518,25 @@
             .totals { text-align: right; margin-top: 20px; }
             .total-row { margin: 5px 0; }
             .final-total { font-weight: bold; font-size: 18px; border-top: 1px solid #333; padding-top: 10px; }
+            @media print {
+              body { 
+                margin: 0; 
+                line-height: 1.4 !important;
+              }
+              table td, table th {
+                line-height: 1.4 !important;
+                padding: 8px !important;
+              }
+              div[style*="page-break-inside: avoid"] {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+              }
+            }
           </style>
         </head>
         <body>
           <div class="invoice-header">
+            <img src="${logoUrl}" alt="Logo" class="invoice-logo">
             <h1>GST INVOICE</h1>
             <p>Invoice Number: ${invoice.invoiceNumber}</p>
             <p>Date: ${invoice.date}</p>
@@ -299,14 +577,53 @@
             <div class="total-row">SGST (2.5%): ₹${invoice.sgstAmount.toFixed(2)}</div>
             <div class="total-row final-total">Grand Total: ₹${invoice.totalAmount.toFixed(2)}</div>
           </div>
+          
+          ${await getBankingDetailsHTML()}
         </body>
         </html>
       `;
     }
 
-    function generateInvoicePDF(invoice) {
+    async function getBankingDetailsHTML() {
+      try {
+        if (!authManager.currentUser) return '';
+
+        const profile = await authManager.getUserProfile(authManager.currentUser.uid);
+        if (!profile?.banking && !profile?.upiQrCode) return '';
+
+        let bankingHtml = '<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;"><h3>Payment Details:</h3>';
+
+        if (profile.banking) {
+          const banking = profile.banking;
+          bankingHtml += '<div style="margin-bottom: 15px;">';
+          if (banking.bankName) bankingHtml += `<p><strong>Bank:</strong> ${banking.bankName}</p>`;
+          if (banking.accountHolder) bankingHtml += `<p><strong>Account Holder:</strong> ${banking.accountHolder}</p>`;
+          if (banking.accountNumber) bankingHtml += `<p><strong>Account Number:</strong> ${banking.accountNumber}</p>`;
+          if (banking.ifscCode) bankingHtml += `<p><strong>IFSC Code:</strong> ${banking.ifscCode}</p>`;
+          if (banking.branchName) bankingHtml += `<p><strong>Branch:</strong> ${banking.branchName}</p>`;
+          if (banking.upiId) bankingHtml += `<p><strong>UPI ID:</strong> ${banking.upiId}</p>`;
+          bankingHtml += '</div>';
+        }
+
+        if (profile.upiQrCode) {
+          bankingHtml += `<div style="text-align: center; margin-top: 15px; page-break-inside: avoid;">
+            <p style="margin-bottom: 8px;"><strong>UPI QR Code:</strong></p>
+            <img src="${profile.upiQrCode}" alt="UPI QR Code" style="height: 100px; width: 100px; display: inline-block;">
+          </div>`;
+        }
+
+        bankingHtml += '</div>';
+        return bankingHtml;
+      } catch (error) {
+        console.error('Error getting banking details:', error);
+        return '';
+      }
+    }
+
+    async function generateInvoicePDF(invoice) {
       const printWindow = window.open('', '_blank');
-      printWindow.document.write(generateInvoiceHTML(invoice));
+      const htmlContent = await generateInvoiceHTML(invoice);
+      printWindow.document.write(htmlContent);
       printWindow.document.close();
       printWindow.onload = function () {
         setTimeout(function () {
@@ -314,6 +631,342 @@
         }, 500);
       };
     }
+
+    function initTabFunctionality() {
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          const targetTab = this.getAttribute('data-tab');
+
+          // Remove active class from all tabs and contents
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+
+          // Add active class to clicked tab and corresponding content
+          this.classList.add('active');
+          document.getElementById(targetTab).classList.add('active');
+        });
+      });
+    }
+
+    function initImagePreview() {
+      // Logo upload handling
+      document.getElementById('company-logo').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const logoPreview = document.getElementById('logo-preview');
+            const logoImg = document.getElementById('logo-preview-img');
+            logoImg.src = e.target.result;
+            logoPreview.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Remove logo functionality
+      document.getElementById('remove-logo').addEventListener('click', function () {
+        document.getElementById('company-logo').value = '';
+        document.getElementById('logo-preview').classList.add('hidden');
+        document.getElementById('logo-preview-img').src = '';
+      });
+
+      // QR code upload handling
+      document.getElementById('upi-qr-code').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const qrPreview = document.getElementById('qr-preview');
+            const qrImg = document.getElementById('qr-preview-img');
+            qrImg.src = e.target.result;
+            qrPreview.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Remove QR code functionality
+      document.getElementById('remove-qr').addEventListener('click', function () {
+        document.getElementById('upi-qr-code').value = '';
+        document.getElementById('qr-preview').classList.add('hidden');
+        document.getElementById('qr-preview-img').src = '';
+      });
+    }
+
+    // Profile management functions
+    async function loadProfileData() {
+      if (!authManager.currentUser) return;
+
+      try {
+        const profile = await authManager.getUserProfile(authManager.currentUser.uid);
+        if (profile) {
+          document.getElementById('display-name').value = profile.displayName || '';
+          document.getElementById('default-seller-name').value = profile.defaultSellerName || '';
+          document.getElementById('default-seller-address').value = profile.defaultSellerAddress || '';
+          document.getElementById('default-seller-gst').value = profile.defaultSellerGst || '';
+
+          // Load company logo if exists
+          if (profile.companyLogo) {
+            const logoPreview = document.getElementById('logo-preview');
+            const logoImg = document.getElementById('logo-preview-img');
+            logoImg.src = profile.companyLogo;
+            logoPreview.classList.remove('hidden');
+          }
+
+          // Load banking details
+          if (profile.banking) {
+            document.getElementById('bank-name').value = profile.banking.bankName || '';
+            document.getElementById('account-holder').value = profile.banking.accountHolder || '';
+            document.getElementById('account-number').value = profile.banking.accountNumber || '';
+            document.getElementById('ifsc-code').value = profile.banking.ifscCode || '';
+            document.getElementById('branch-name').value = profile.banking.branchName || '';
+            document.getElementById('upi-id').value = profile.banking.upiId || '';
+          }
+
+          // Load UPI QR code if exists
+          if (profile.upiQrCode) {
+            const qrPreview = document.getElementById('qr-preview');
+            const qrImg = document.getElementById('qr-preview-img');
+            qrImg.src = profile.upiQrCode;
+            qrPreview.classList.remove('hidden');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    }
+
+    async function saveProfileData() {
+      if (!authManager.currentUser) return;
+
+      const profileData = {
+        displayName: document.getElementById('display-name').value,
+        defaultSellerName: document.getElementById('default-seller-name').value,
+        defaultSellerAddress: document.getElementById('default-seller-address').value,
+        defaultSellerGst: document.getElementById('default-seller-gst').value,
+        email: authManager.currentUser.email,
+        updatedAt: new Date().toISOString()
+      };
+
+      // Banking details
+      const bankingData = {
+        bankName: document.getElementById('bank-name').value,
+        accountHolder: document.getElementById('account-holder').value,
+        accountNumber: document.getElementById('account-number').value,
+        ifscCode: document.getElementById('ifsc-code').value,
+        branchName: document.getElementById('branch-name').value,
+        upiId: document.getElementById('upi-id').value
+      };
+
+      // Add banking details if any field is filled
+      if (Object.values(bankingData).some(value => value.trim() !== '')) {
+        profileData.banking = bankingData;
+      }
+
+      // Include company logo if uploaded
+      const logoImg = document.getElementById('logo-preview-img');
+      if (logoImg.src && !logoImg.src.includes('assets/images/')) {
+        profileData.companyLogo = logoImg.src;
+      }
+
+      // Include UPI QR code if uploaded
+      const qrImg = document.getElementById('qr-preview-img');
+      if (qrImg.src && qrImg.src.trim() !== '') {
+        profileData.upiQrCode = qrImg.src;
+      }
+
+      try {
+        await authManager.createUserProfile(authManager.currentUser.uid, profileData);
+        alert('Profile updated successfully!');
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        alert('Error saving profile: ' + error.message);
+      }
+    }
+
+    // Invoice Creation Functionality
+    let itemIndex = 1;
+    let currentInvoice = null;
+
+    // Initialize invoice functionality when create-invoice section becomes visible
+    function initializeInvoiceForm() {
+      const form = document.getElementById('invoice-form');
+      const generateBtn = document.getElementById('generate-invoice');
+      const downloadBtn = document.getElementById('download-pdf');
+      const invoiceOutput = document.getElementById('invoice-output');
+      const addItemBtn = document.getElementById('add-item-btn');
+      const saveInvoiceBtn = document.getElementById('save-invoice');
+
+      if (!form) return; // Form not ready yet
+
+      // Add item functionality
+      if (addItemBtn) {
+        addItemBtn.removeEventListener('click', addNewItemHandler); // Remove existing listener
+        addItemBtn.addEventListener('click', addNewItemHandler);
+      }
+
+      // Generate invoice functionality
+      if (generateBtn) {
+        generateBtn.removeEventListener('click', generateInvoiceHandler);
+        generateBtn.addEventListener('click', generateInvoiceHandler);
+      }
+
+      // Download PDF functionality
+      if (downloadBtn) {
+        downloadBtn.removeEventListener('click', downloadPDFHandler);
+        downloadBtn.addEventListener('click', downloadPDFHandler);
+      }
+
+      // Save invoice functionality
+      if (saveInvoiceBtn) {
+        saveInvoiceBtn.removeEventListener('click', saveInvoiceHandler);
+        saveInvoiceBtn.addEventListener('click', saveInvoiceHandler);
+      }
+
+      // Load buyer data and setup form
+      loadBuyerData();
+      setupItemCalculations();
+    }
+
+    function addNewItemHandler(e) {
+      e.preventDefault();
+      addNewItem();
+    }
+
+    function generateInvoiceHandler(e) {
+      e.preventDefault();
+      const invoiceData = collectFormData();
+
+      if (!validateFormData(invoiceData)) {
+        return;
+      }
+
+      const invoice = generateInvoice(invoiceData);
+      currentInvoice = { invoiceData, invoice };
+      displayInvoice(invoice);
+      document.getElementById('invoice-output').classList.remove('hidden');
+    }
+
+    async function downloadPDFHandler(e) {
+      e.preventDefault();
+      const invoiceData = collectFormData();
+      await generatePDF(invoiceData);
+    }
+
+    async function saveInvoiceHandler(e) {
+      e.preventDefault();
+      console.log('Save button clicked');
+
+      if (!currentInvoice) {
+        alert('Please generate an invoice first');
+        return;
+      }
+
+      if (!authManager.currentUser) {
+        alert('Please login to save invoices');
+        return;
+      }
+
+      try {
+        console.log('Saving invoice...', currentInvoice);
+        const invoiceId = await invoiceStorage.saveInvoice(currentInvoice.invoiceData, currentInvoice.invoice);
+        console.log('Invoice saved with ID:', invoiceId);
+
+        // Save buyer data if it doesn't exist
+        const buyerData = {
+          name: currentInvoice.invoiceData.buyer.name,
+          address: currentInvoice.invoiceData.buyer.address,
+          gst: currentInvoice.invoiceData.buyer.gst
+        };
+
+        if (buyerData.name && authManager?.currentUser) {
+          await buyerStorage.saveBuyer(buyerData);
+        }
+
+        alert('Invoice saved successfully!');
+
+        // Refresh saved invoices list if we're on that tab
+        const savedInvoicesSection = document.getElementById('saved-invoices');
+        if (!savedInvoicesSection.classList.contains('hidden')) {
+          loadSavedInvoices();
+        }
+      } catch (error) {
+        console.error('Error saving invoice:', error);
+        alert('Error saving invoice: ' + error.message);
+      }
+    }
+
+    function loadBuyerData() {
+      const buyerSelect = document.getElementById('buyer-select');
+      if (!buyerSelect || !authManager?.currentUser) {
+        console.log('Cannot load buyer data:', {
+          buyerSelect: !!buyerSelect,
+          currentUser: !!authManager?.currentUser
+        });
+        return;
+      }
+
+      console.log('Loading buyer data...');
+      buyerStorage.getAllBuyers().then(result => {
+        console.log('Buyer data result:', result);
+        buyerSelect.innerHTML = '<option value="">-- Select a buyer or enter new details --</option>';
+
+        if (result.success && result.buyers && Array.isArray(result.buyers)) {
+          result.buyers.forEach(buyer => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify(buyer);
+            option.textContent = `${buyer.name}${buyer.gst ? ` (${buyer.gst})` : ''}`;
+            buyerSelect.appendChild(option);
+          });
+        } else {
+          console.log('No buyers found or error loading buyers:', result);
+        }
+
+        // Remove existing event listener to avoid duplicates
+        buyerSelect.removeEventListener('change', buyerSelectHandler);
+        buyerSelect.addEventListener('change', buyerSelectHandler);
+      }).catch(error => {
+        console.error('Error loading buyers:', error);
+      });
+    }
+
+    function buyerSelectHandler() {
+      if (this.value) {
+        const buyer = JSON.parse(this.value);
+        document.getElementById('buyer-name').value = buyer.name || '';
+        document.getElementById('buyer-address').value = buyer.address || '';
+        document.getElementById('buyer-gst').value = buyer.gst || '';
+      }
+    }
+
+    function setupItemCalculations() {
+      // Add event listeners for item calculations
+      document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('item-quantity') || e.target.classList.contains('item-price')) {
+          const itemRow = e.target.closest('.item-row');
+          if (itemRow) {
+            calculateItemTotal(itemRow);
+            calculateGrandTotal();
+          }
+        }
+      });
+    }
+
+    // Override section switching to initialize invoice form when needed
+    const originalMenuClick = document.querySelector('.menu').addEventListener;
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', function (e) {
+        const section = this.getAttribute('data-section');
+        if (section === 'create-invoice-section') {
+          // Small delay to ensure DOM is updated
+          setTimeout(initializeInvoiceForm, 100);
+        }
+      });
+    });
   </script>
 </body>
 

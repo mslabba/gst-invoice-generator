@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GST Invoice Generator</title>
+    <link rel="icon" type="image/png" href="assets/images/logo-fav.png">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -22,7 +23,10 @@
             <button id="auth-button">Login</button>
         </div>
 
-        <h1>GST Invoice Generator</h1>
+        <div class="app-header">
+            <img src="assets/images/logo.png" alt="Logo" class="app-logo">
+            <h1>GST Invoice Generator</h1>
+        </div>
 
         <form id="invoice-form">
             <div class="details-grid">
@@ -50,6 +54,13 @@
 
                 <div class="details-column">
                     <h2>Buyer Details</h2>
+                    <div class="buyer-selection">
+                        <label for="buyer-select">Select Existing Buyer (Optional):</label>
+                        <select id="buyer-select">
+                            <option value="">-- Select a buyer or enter new details --</option>
+                        </select>
+                    </div>
+
                     <label for="buyer-name">Buyer Name:</label>
                     <input type="text" id="buyer-name" required>
 
