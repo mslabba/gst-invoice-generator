@@ -496,8 +496,8 @@
                 <span class="invoice-date">${invoice.date}</span>
               </div>
               <div class="invoice-details">
-                <p><strong>Buyer:</strong> ${invoice.buyer.name}</p>
-                <p><strong>Amount:</strong> ₹${invoice.totalAmount.toFixed(2)}</p>
+                <p><strong>Buyer:</strong> ${invoice.buyer ? invoice.buyer.name : 'N/A'}</p>
+                <p><strong>Amount:</strong> ₹${(invoice.totalAmount || 0).toFixed(2)}</p>
               </div>
               <div class="invoice-actions">
                 <button class="view-btn" onclick="viewInvoice('${invoice.id}')">View</button>
@@ -583,9 +583,9 @@
             </div>
             <div class="details-section">
               <h3>Buyer Details:</h3>
-              <p><strong>Name:</strong> ${invoice.buyer.name}</p>
-              ${invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
-              ${invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
+              <p><strong>Name:</strong> ${invoice.buyer ? invoice.buyer.name || 'N/A' : 'N/A'}</p>
+              ${invoice.buyer && invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
+              ${invoice.buyer && invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
             </div>
           </div>
           
@@ -604,10 +604,10 @@
           </table>
           
           <div class="totals">
-            <div class="total-row">Subtotal: ₹${invoice.subtotal.toFixed(2)}</div>
-            <div class="total-row">CGST (2.5%): ₹${invoice.cgstAmount.toFixed(2)}</div>
-            <div class="total-row">SGST (2.5%): ₹${invoice.sgstAmount.toFixed(2)}</div>
-            <div class="total-row final-total">Grand Total: ₹${invoice.totalAmount.toFixed(2)}</div>
+            <div class="total-row">Subtotal: ₹${(invoice.subtotal || 0).toFixed(2)}</div>
+            <div class="total-row">CGST (2.5%): ₹${(invoice.cgstAmount || 0).toFixed(2)}</div>
+            <div class="total-row">SGST (2.5%): ₹${(invoice.sgstAmount || 0).toFixed(2)}</div>
+            <div class="total-row final-total">Grand Total: ₹${(invoice.totalAmount || 0).toFixed(2)}</div>
           </div>
           
           ${await getBankingDetailsHTML()}
@@ -948,9 +948,9 @@
             
             <div class="invoice-section">
               <h3>Buyer Details:</h3>
-              <p><strong>Name:</strong> ${invoice.buyer.name}</p>
-              ${invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
-              ${invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
+              <p><strong>Name:</strong> ${invoice.buyer ? invoice.buyer.name || 'N/A' : 'N/A'}</p>
+              ${invoice.buyer && invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
+              ${invoice.buyer && invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
             </div>
           </div>
           
@@ -975,19 +975,19 @@
             </div>
             <div class="amount-row">
               <span>CGST (2.5%):</span>
-              <span>₹${invoice.cgstAmount.toFixed(2)}</span>
+              <span>₹${(invoice.cgstAmount || 0).toFixed(2)}</span>
             </div>
             <div class="amount-row">
               <span>SGST (2.5%):</span>
-              <span>₹${invoice.sgstAmount.toFixed(2)}</span>
+              <span>₹${(invoice.sgstAmount || 0).toFixed(2)}</span>
             </div>
             <div class="amount-row">
               <span>Total GST:</span>
-              <span>₹${invoice.totalGstAmount.toFixed(2)}</span>
+              <span>₹${(invoice.totalGstAmount || 0).toFixed(2)}</span>
             </div>
             <div class="amount-row total-amount">
               <span>Total Amount:</span>
-              <span>₹${invoice.totalAmount.toFixed(2)}</span>
+              <span>₹${(invoice.totalAmount || 0).toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -1035,7 +1035,7 @@
 
       try {
         console.log('Saving invoice...', currentInvoice);
-        const invoiceId = await invoiceStorage.saveInvoice(currentInvoice.invoiceData, currentInvoice.invoice);
+        const invoiceId = await invoiceStorage.saveInvoice(currentInvoice.invoice);
         console.log('Invoice saved with ID:', invoiceId);
 
         // Save buyer data if it doesn't exist
