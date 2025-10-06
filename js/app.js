@@ -152,6 +152,10 @@ function createItemRow(index) {
                 <input type="text" class="item-description" placeholder="Enter item description" required>
             </div>
             <div class="field-group">
+                <label>HSN Code:</label>
+                <input type="text" class="item-hsn" placeholder="HSN Code (Optional)">
+            </div>
+            <div class="field-group">
                 <label>Quantity:</label>
                 <input type="number" class="item-quantity" min="1" step="0.01" value="1" required>
             </div>
@@ -239,12 +243,13 @@ function collectFormData() {
 
     itemRows.forEach(row => {
         const description = row.querySelector('.item-description').value;
+        const hsn = row.querySelector('.item-hsn').value || '';
         const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
         const price = parseFloat(row.querySelector('.item-price').value) || 0;
         const total = parseFloat(row.querySelector('.item-total').value) || 0;
 
         if (description && quantity > 0 && price >= 0) {
-            items.push({ description, quantity, price, total });
+            items.push({ description, hsn, quantity, price, total });
         }
     });
 
@@ -294,7 +299,7 @@ function displayInvoice(invoice) {
     invoice.items.forEach(item => {
         itemsHtml += `
             <tr>
-                <td>${item.description}</td>
+                <td>${item.description}${item.hsn ? `<br><small>HSN: ${item.hsn}</small>` : ''}</td>
                 <td class="text-right">${item.quantity}</td>
                 <td class="text-right">₹${item.price.toFixed(2)}</td>
                 <td class="text-right">₹${item.total.toFixed(2)}</td>

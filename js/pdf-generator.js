@@ -9,7 +9,7 @@ async function generatePDF(invoiceData) {
     invoice.items.forEach(item => {
         itemsTableHtml += `
             <tr>
-                <td>${item.description}</td>
+                <td>${item.description}${item.hsn ? `<br><small style="color: #666;">HSN: ${item.hsn}</small>` : ''}</td>
                 <td style="text-align: center;">${item.quantity}</td>
                 <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
                 <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
