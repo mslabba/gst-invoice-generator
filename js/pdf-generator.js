@@ -1,8 +1,11 @@
 async function generatePDF(invoiceData) {
-    const invoice = generateInvoice(invoiceData);
-
-    // Get company logo
+    // Get company logo and add it to seller data if not already present
     const logoUrl = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
+    if (!invoiceData.seller.logo) {
+        invoiceData.seller.logo = logoUrl;
+    }
+
+    const invoice = generateInvoice(invoiceData);
 
     // Create items table HTML
     let itemsTableHtml = '';
@@ -28,52 +31,39 @@ async function generatePDF(invoiceData) {
             <style>
                 body {
                     font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 20px;
+                    margin: 15px;
+                    padding: 0;
                     color: #333;
-                    line-height: 1.4;
+                    line-height: 1.2;
+                    font-size: 14px;
                 }
                 .invoice-container {
-                    max-width: 800px;
+                    max-width: 100%;
                     margin: 0 auto;
                 }
                 .invoice-header {
                     text-align: center;
                     border-bottom: 2px solid #333;
-                    padding-bottom: 20px;
-                    margin-bottom: 30px;
+                    padding-bottom: 15px;
+                    margin-bottom: 20px;
                     position: relative;
                 }
                 .invoice-header h1 {
                     color: #2c3e50;
-                    margin: 10px 0 0 0;
+                    margin: 8px 0 0 0;
+                    font-size: 24px;
+                }
+                .invoice-header p {
+                    margin: 3px 0;
+                    font-size: 14px;
                 }
                 .invoice-logo {
-                    height: 60px;
+                    margin-bottom: 8px;
+                    text-align: center;
+                }
+                .invoice-logo img {
+                    height: 45px;
                     width: auto;
-                    margin-bottom: 10px;
-                }
-                .invoice-logo {
-                    margin-bottom: 15px;
-                    text-align: center;
-                }
-                .invoice-logo img {
-                    max-height: 80px;
-                    max-width: 200px;
-                    object-fit: contain;
-                    display: block;
-                    margin: 0 auto;
-                    border: none;
-                    -webkit-print-color-adjust: exact;
-                    color-adjust: exact;
-                }
-                .invoice-logo {
-                    margin-bottom: 15px;
-                    text-align: center;
-                }
-                .invoice-logo img {
-                    max-height: 80px;
-                    max-width: 200px;
                     object-fit: contain;
                     display: block;
                     margin: 0 auto;
@@ -82,38 +72,38 @@ async function generatePDF(invoiceData) {
                     color-adjust: exact;
                 }
                 .invoice-details {
-                    display: table;
-                    width: 100%;
-                    margin-bottom: 30px;
-                }
-                .seller-buyer {
-                    display: table-row;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                    margin-bottom: 20px;
                 }
                 .seller, .buyer {
-                    display: table-cell;
-                    width: 50%;
-                    padding: 15px;
+                    padding: 10px;
+                    background-color: #f8f9fa;
+                    border-radius: 4px;
                     vertical-align: top;
                 }
-                .seller {
-                    border-right: 1px solid #ddd;
+                .seller p, .buyer p {
+                    margin: 3px 0;
+                    font-size: 12px;
                 }
                 .section-title {
                     font-weight: bold;
                     color: #2c3e50;
-                    margin-bottom: 10px;
-                    font-size: 1.1em;
+                    margin: 0 0 8px 0;
+                    font-size: 14px;
                 }
                 .items-table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin: 20px 0;
+                    margin: 15px 0;
                 }
                 .items-table th,
                 .items-table td {
-                    padding: 10px;
+                    padding: 6px 8px;
                     text-align: left;
                     border: 1px solid #ddd;
+                    font-size: 12px;
                 }
                 .items-table th {
                     background-color: #f8f9fa;
@@ -122,13 +112,14 @@ async function generatePDF(invoiceData) {
                 .amount-table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin-top: 30px;
+                    margin-top: 15px;
                 }
                 .amount-table th,
                 .amount-table td {
-                    padding: 10px;
+                    padding: 6px 8px;
                     text-align: right;
                     border: 1px solid #ddd;
+                    font-size: 12px;
                 }
                 .amount-table th {
                     background-color: #f8f9fa;
@@ -137,36 +128,94 @@ async function generatePDF(invoiceData) {
                 .total-row {
                     font-weight: bold;
                     background-color: #e9ecef;
+                    font-size: 14px;
                 }
                 .footer {
-                    margin-top: 50px;
+                    margin-top: 15px;
                     text-align: center;
-                    font-size: 12px;
+                    font-size: 11px;
                     color: #666;
+                }
+                .payment-details {
+                    margin-top: 15px;
+                    padding-top: 15px;
+                    border-top: 1px solid #ddd;
+                }
+                .payment-details h3 {
+                    margin: 0 0 8px 0;
+                    font-size: 14px;
+                    color: #2c3e50;
+                }
+                .payment-grid {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr;
+                    gap: 15px;
+                    align-items: start;
+                }
+                .payment-details p {
+                    margin: 2px 0;
+                    font-size: 11px;
+                }
+                .qr-section {
+                    text-align: center;
+                }
+                .qr-section p {
+                    margin-bottom: 5px;
+                    font-size: 11px;
+                }
+                .qr-section img {
+                    height: 80px;
+                    width: 80px;
                 }
                 @media print {
                     body { 
-                        margin: 0; 
-                        line-height: 1.4 !important;
+                        margin: 10px !important; 
+                        line-height: 1.2 !important;
+                        font-size: 14px !important;
                     }
                     .no-print { display: none; }
+                    .invoice-header { 
+                        padding-bottom: 10px !important; 
+                        margin-bottom: 15px !important; 
+                    }
+                    .invoice-details { 
+                        margin-bottom: 15px !important; 
+                        gap: 15px !important; 
+                    }
+                    .seller, .buyer { 
+                        padding: 8px !important; 
+                    }
+                    .items-table { 
+                        margin: 10px 0 !important; 
+                    }
+                    .amount-table { 
+                        margin-top: 10px !important; 
+                    }
+                    .payment-details { 
+                        margin-top: 10px !important; 
+                        padding-top: 10px !important; 
+                    }
+                    .qr-section img { 
+                        height: 70px !important; 
+                        width: 70px !important; 
+                    }
                     .invoice-logo img {
-                        max-height: 80px;
-                        max-width: 200px;
-                        object-fit: contain;
+                        height: 40px !important;
                         -webkit-print-color-adjust: exact;
                         color-adjust: exact;
                     }
                     .invoice-container { 
-                        line-height: 1.4 !important; 
+                        line-height: 1.2 !important; 
                     }
                     .items-table td, .items-table th {
-                        line-height: 1.4 !important;
-                        padding: 8px !important;
+                        line-height: 1.2 !important;
+                        padding: 4px 6px !important;
+                        font-size: 11px !important;
                     }
                     .amount-table td, .amount-table th {
-                        line-height: 1.4 !important;
-                        padding: 8px !important;
+                        line-height: 1.2 !important;
+                        padding: 4px 6px !important;
+                        font-size: 11px !important;
                     }
                     div[style*="page-break-inside: avoid"] {
                         page-break-inside: avoid !important;
@@ -185,19 +234,17 @@ async function generatePDF(invoiceData) {
                 </div>
                 
                 <div class="invoice-details">
-                    <div class="seller-buyer">
-                        <div class="seller">
-                            <div class="section-title">Seller Details:</div>
-                            <p><strong>Name:</strong> ${invoice.seller.name}</p>
-                            ${invoice.seller.address ? `<p><strong>Address:</strong> ${invoice.seller.address}</p>` : ''}
-                            ${invoice.seller.gst ? `<p><strong>GST Number:</strong> ${invoice.seller.gst}</p>` : ''}
-                        </div>
-                        <div class="buyer">
-                            <div class="section-title">Buyer Details:</div>
-                            <p><strong>Name:</strong> ${invoice.buyer.name}</p>
-                            ${invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
-                            ${invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
-                        </div>
+                    <div class="seller">
+                        <div class="section-title">Seller Details:</div>
+                        <p><strong>Name:</strong> ${invoice.seller.name}</p>
+                        ${invoice.seller.address ? `<p><strong>Address:</strong> ${invoice.seller.address}</p>` : ''}
+                        ${invoice.seller.gst ? `<p><strong>GST Number:</strong> ${invoice.seller.gst}</p>` : ''}
+                    </div>
+                    <div class="buyer">
+                        <div class="section-title">Buyer Details:</div>
+                        <p><strong>Name:</strong> ${invoice.buyer.name}</p>
+                        ${invoice.buyer.address ? `<p><strong>Address:</strong> ${invoice.buyer.address}</p>` : ''}
+                        ${invoice.buyer.gst ? `<p><strong>GST Number:</strong> ${invoice.buyer.gst}</p>` : ''}
                     </div>
                 </div>
                 
@@ -274,40 +321,35 @@ async function getBankingDetailsForPDF() {
         const profile = await window.authManager.getUserProfile(window.authManager.currentUser.uid);
         if (!profile?.banking && !profile?.upiQrCode) return '';
 
-        let bankingHtml = `
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd; page-break-inside: avoid;">
-                <h3 style="color: #2c3e50; margin-bottom: 12px; line-height: 1.3;">Payment Details:</h3>
-        `;
+        let bankingHtml = '<div class="payment-details"><h3>Payment Details:</h3>';
+
+        // Use grid layout to optimize space
+        bankingHtml += '<div class="payment-grid">';
 
         if (profile.banking) {
             const banking = profile.banking;
-            bankingHtml += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">';
-
-            bankingHtml += '<div>';
+            bankingHtml += '<div class="banking-info">';
             if (banking.bankName) bankingHtml += `<p><strong>Bank:</strong> ${banking.bankName}</p>`;
             if (banking.accountHolder) bankingHtml += `<p><strong>Account Holder:</strong> ${banking.accountHolder}</p>`;
             if (banking.accountNumber) bankingHtml += `<p><strong>Account Number:</strong> ${banking.accountNumber}</p>`;
-            bankingHtml += '</div>';
-
-            bankingHtml += '<div>';
             if (banking.ifscCode) bankingHtml += `<p><strong>IFSC Code:</strong> ${banking.ifscCode}</p>`;
             if (banking.branchName) bankingHtml += `<p><strong>Branch:</strong> ${banking.branchName}</p>`;
             if (banking.upiId) bankingHtml += `<p><strong>UPI ID:</strong> ${banking.upiId}</p>`;
             bankingHtml += '</div>';
-
-            bankingHtml += '</div>';
+        } else {
+            bankingHtml += '<div class="banking-info"></div>';
         }
 
         if (profile.upiQrCode) {
-            bankingHtml += `
-                <div style="text-align: center; margin-top: 15px; page-break-inside: avoid;">
-                    <p style="margin-bottom: 8px;"><strong>Scan to Pay:</strong></p>
-                    <img src="${profile.upiQrCode}" alt="UPI QR Code" style="height: 100px; width: 100px; border: 1px solid #ddd; display: inline-block;">
-                </div>
-            `;
+            bankingHtml += `<div class="qr-section" style="page-break-inside: avoid;">
+                <p><strong>UPI QR Code:</strong></p>
+                <img src="${profile.upiQrCode}" alt="UPI QR Code">
+            </div>`;
+        } else {
+            bankingHtml += '<div class="qr-section"></div>';
         }
 
-        bankingHtml += '</div>';
+        bankingHtml += '</div></div>';
         return bankingHtml;
     } catch (error) {
         console.error('Error getting banking details for PDF:', error);

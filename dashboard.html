@@ -539,26 +539,44 @@
         <head>
           <title>Invoice ${invoice.invoiceNumber}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
-            .invoice-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-            .invoice-logo { height: 60px; width: auto; margin-bottom: 10px; }
-            .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-            .details-section { padding: 15px; background-color: #f8f9fa; border-radius: 4px; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
-            th { background-color: #f8f9fa; }
-            .totals { text-align: right; margin-top: 20px; }
-            .total-row { margin: 5px 0; }
-            .final-total { font-weight: bold; font-size: 18px; border-top: 1px solid #333; padding-top: 10px; }
+            body { font-family: Arial, sans-serif; margin: 15px; line-height: 1.2; font-size: 14px; }
+            .invoice-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+            .invoice-logo { height: 45px; width: auto; margin-bottom: 8px; }
+            .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+            .details-section { padding: 10px; background-color: #f8f9fa; border-radius: 4px; }
+            .details-section h3 { margin: 0 0 8px 0; font-size: 14px; }
+            .details-section p { margin: 3px 0; font-size: 12px; }
+            table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+            th, td { padding: 6px 8px; text-align: left; border: 1px solid #ddd; font-size: 12px; }
+            th { background-color: #f8f9fa; font-weight: bold; }
+            .totals { text-align: right; margin-top: 15px; }
+            .total-row { margin: 2px 0; font-size: 12px; }
+            .final-total { font-weight: bold; font-size: 14px; border-top: 1px solid #333; padding-top: 5px; margin-top: 5px; }
+            .payment-details { margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; }
+            .payment-details h3 { margin: 0 0 8px 0; font-size: 14px; }
+            .payment-details p { margin: 2px 0; font-size: 11px; }
+            .payment-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; align-items: start; }
+            .qr-section { text-align: center; }
+            .qr-section p { margin-bottom: 5px; font-size: 11px; }
+            .qr-section img { height: 80px; width: 80px; }
             @media print {
               body { 
-                margin: 0; 
-                line-height: 1.4 !important;
+                margin: 10px !important; 
+                line-height: 1.2 !important;
+                font-size: 14px !important;
               }
-              table td, table th {
-                line-height: 1.4 !important;
-                padding: 8px !important;
+              .invoice-header { padding-bottom: 10px !important; margin-bottom: 15px !important; }
+              .details-grid { margin-bottom: 15px !important; gap: 15px !important; }
+              .details-section { padding: 8px !important; }
+              table { margin: 10px 0 !important; }
+              th, td {
+                line-height: 1.2 !important;
+                padding: 4px 6px !important;
+                font-size: 11px !important;
               }
+              .totals { margin-top: 10px !important; }
+              .payment-details { margin-top: 10px !important; padding-top: 10px !important; }
+              .qr-section img { height: 70px !important; width: 70px !important; }
               div[style*="page-break-inside: avoid"] {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -623,11 +641,14 @@
         const profile = await authManager.getUserProfile(authManager.currentUser.uid);
         if (!profile?.banking && !profile?.upiQrCode) return '';
 
-        let bankingHtml = '<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;"><h3>Payment Details:</h3>';
+        let bankingHtml = '<div class="payment-details"><h3>Payment Details:</h3>';
+
+        // Use grid layout to optimize space
+        bankingHtml += '<div class="payment-grid">';
 
         if (profile.banking) {
           const banking = profile.banking;
-          bankingHtml += '<div style="margin-bottom: 15px;">';
+          bankingHtml += '<div class="banking-info">';
           if (banking.bankName) bankingHtml += `<p><strong>Bank:</strong> ${banking.bankName}</p>`;
           if (banking.accountHolder) bankingHtml += `<p><strong>Account Holder:</strong> ${banking.accountHolder}</p>`;
           if (banking.accountNumber) bankingHtml += `<p><strong>Account Number:</strong> ${banking.accountNumber}</p>`;
@@ -635,16 +656,20 @@
           if (banking.branchName) bankingHtml += `<p><strong>Branch:</strong> ${banking.branchName}</p>`;
           if (banking.upiId) bankingHtml += `<p><strong>UPI ID:</strong> ${banking.upiId}</p>`;
           bankingHtml += '</div>';
+        } else {
+          bankingHtml += '<div class="banking-info"></div>';
         }
 
         if (profile.upiQrCode) {
-          bankingHtml += `<div style="text-align: center; margin-top: 15px; page-break-inside: avoid;">
-            <p style="margin-bottom: 8px;"><strong>UPI QR Code:</strong></p>
-            <img src="${profile.upiQrCode}" alt="UPI QR Code" style="height: 100px; width: 100px; display: inline-block;">
+          bankingHtml += `<div class="qr-section" style="page-break-inside: avoid;">
+            <p><strong>UPI QR Code:</strong></p>
+            <img src="${profile.upiQrCode}" alt="UPI QR Code">
           </div>`;
+        } else {
+          bankingHtml += '<div class="qr-section"></div>';
         }
 
-        bankingHtml += '</div>';
+        bankingHtml += '</div></div>';
         return bankingHtml;
       } catch (error) {
         console.error('Error getting banking details:', error);
@@ -859,7 +884,10 @@
         saveInvoiceBtn.addEventListener('click', saveInvoiceHandler);
       }
 
-      // Load buyer data and setup form
+      // Load default seller data, buyer data and setup form
+      if (authManager && authManager.currentUser) {
+        authManager.loadDefaultSellerData();
+      }
       loadBuyerData();
       setupItemCalculations();
     }
@@ -999,13 +1027,17 @@
       addNewItem();
     }
 
-    function generateInvoiceHandler(e) {
+    async function generateInvoiceHandler(e) {
       e.preventDefault();
       const invoiceData = collectFormData();
 
       if (!validateFormData(invoiceData)) {
         return;
       }
+
+      // Get company logo and add it to seller data
+      const companyLogo = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
+      invoiceData.seller.logo = companyLogo;
 
       const invoice = generateInvoice(invoiceData);
       currentInvoice = { invoiceData, invoice };
@@ -1015,8 +1047,23 @@
 
     async function downloadPDFHandler(e) {
       e.preventDefault();
-      const invoiceData = collectFormData();
-      await generatePDF(invoiceData);
+
+      // Use current invoice if available, otherwise collect form data
+      let invoiceToDownload;
+      if (currentInvoice) {
+        invoiceToDownload = currentInvoice.invoice;
+      } else {
+        const invoiceData = collectFormData();
+        if (!validateFormData(invoiceData)) {
+          return;
+        }
+        // Get company logo and add it to seller data
+        const companyLogo = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
+        invoiceData.seller.logo = companyLogo;
+        invoiceToDownload = generateInvoice(invoiceData);
+      }
+
+      await generateInvoicePDF(invoiceToDownload);
     }
 
     async function saveInvoiceHandler(e) {
