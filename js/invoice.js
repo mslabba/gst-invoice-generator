@@ -13,11 +13,18 @@ function generateInvoice(data) {
     const totalGstAmount = cgstAmount + sgstAmount;
     const totalAmount = subtotal + totalGstAmount;
 
-    // Generate invoice number
-    const invoiceNumber = 'INV-' + Date.now().toString().slice(-6);
+    // Generate invoice number - use custom if provided, otherwise auto-generate
+    const invoiceNumber = data.customInvoiceNumber || ('INV-' + Date.now().toString().slice(-6));
 
-    // Get current date
-    const currentDate = new Date().toLocaleDateString('en-IN');
+    // Get current date - use custom if provided, otherwise use today
+    let currentDate;
+    if (data.customDate) {
+        // Convert from YYYY-MM-DD to DD/MM/YYYY format
+        const dateObj = new Date(data.customDate + 'T00:00:00');
+        currentDate = dateObj.toLocaleDateString('en-IN');
+    } else {
+        currentDate = new Date().toLocaleDateString('en-IN');
+    }
 
     return {
         invoiceNumber: invoiceNumber,

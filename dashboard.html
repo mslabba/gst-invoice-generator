@@ -108,9 +108,32 @@
       flex: 1;
     }
 
+    .secondary-btn {
+      background-color: #6c757d !important;
+      color: white !important;
+    }
+
+    .secondary-btn:hover {
+      background-color: #5a6268 !important;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 3px;
+      font-style: italic;
+    }
+
     @media (max-width: 768px) {
       .item-fields {
         grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons button {
+        margin-bottom: 10px;
       }
     }
   </style>
@@ -296,6 +319,23 @@
             </div>
           </div>
 
+          <h3>Invoice Details</h3>
+          <div class="seller-buyer-container">
+            <div class="seller-section">
+              <div class="form-group">
+                <label for="invoice-number">Invoice Number:</label>
+                <input type="text" id="invoice-number" placeholder="Auto-generated" value="">
+                <small style="color: #666;">Leave blank for auto-generation</small>
+              </div>
+            </div>
+            <div class="buyer-section">
+              <div class="form-group">
+                <label for="invoice-date">Invoice Date:</label>
+                <input type="date" id="invoice-date" required>
+              </div>
+            </div>
+          </div>
+
           <h3>Invoice Items</h3>
           <div id="items-container">
             <div class="item-row" data-index="0">
@@ -352,6 +392,7 @@
           <div class="action-buttons">
             <button id="download-pdf">Download PDF</button>
             <button id="save-invoice" class="save-btn">Save Invoice</button>
+            <button id="new-invoice-btn" class="secondary-btn">Start New Invoice</button>
           </div>
         </div>
       </div>
@@ -525,7 +566,7 @@
       invoice.items.forEach(item => {
         itemsHtml += `
           <tr>
-            <td>${item.description}</td>
+            <td>${item.description}${item.hsn ? `<br><small style="color: #666;">HSN: ${item.hsn}</small>` : ''}</td>
             <td style="text-align: center;">${item.quantity}</td>
             <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
             <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
@@ -884,6 +925,19 @@
         saveInvoiceBtn.addEventListener('click', saveInvoiceHandler);
       }
 
+      // New Invoice button functionality
+      const newInvoiceBtn = document.getElementById('new-invoice-btn');
+      if (newInvoiceBtn) {
+        newInvoiceBtn.removeEventListener('click', startNewInvoiceHandler);
+        newInvoiceBtn.addEventListener('click', startNewInvoiceHandler);
+      }
+
+      // Set default invoice date to today
+      const invoiceDateField = document.getElementById('invoice-date');
+      if (invoiceDateField && !invoiceDateField.value) {
+        invoiceDateField.value = new Date().toISOString().split('T')[0];
+      }
+
       // Load default seller data, buyer data and setup form
       if (authManager && authManager.currentUser) {
         authManager.loadDefaultSellerData();
@@ -920,7 +974,9 @@
           address: document.getElementById('buyer-address').value,
           gst: document.getElementById('buyer-gst').value
         },
-        items: items
+        items: items,
+        customInvoiceNumber: document.getElementById('invoice-number').value.trim(),
+        customDate: document.getElementById('invoice-date').value
       };
     }
 
@@ -932,6 +988,10 @@
       }
       if (!data.buyer.name) {
         alert('Please enter buyer name');
+        return false;
+      }
+      if (!data.customDate) {
+        alert('Please select invoice date');
         return false;
       }
       if (data.items.length === 0) {
@@ -1039,10 +1099,26 @@
       const companyLogo = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
       invoiceData.seller.logo = companyLogo;
 
+      // Add custom invoice number and date if provided
+      const customInvoiceNumber = document.getElementById('invoice-number').value.trim();
+      const customDate = document.getElementById('invoice-date').value;
+      invoiceData.customInvoiceNumber = customInvoiceNumber;
+      invoiceData.customDate = customDate;
+
       const invoice = generateInvoice(invoiceData);
       currentInvoice = { invoiceData, invoice };
       displayInvoice(invoice);
-      document.getElementById('invoice-output').classList.remove('hidden');
+
+      const invoiceOutput = document.getElementById('invoice-output');
+      invoiceOutput.classList.remove('hidden');
+
+      // Scroll to the generated invoice
+      setTimeout(() => {
+        invoiceOutput.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
     }
 
     async function downloadPDFHandler(e) {
@@ -1263,6 +1339,77 @@
           }
         }
       });
+    }
+
+    // Start new invoice handler
+    function startNewInvoiceHandler(e) {
+      e.preventDefault();
+
+      if (confirm('Are you sure you want to start a new invoice? Any unsaved changes will be lost.')) {
+        // Reset the form
+        document.getElementById('invoice-form').reset();
+
+        // Reset invoice number and set today's date
+        document.getElementById('invoice-number').value = '';
+        document.getElementById('invoice-date').value = new Date().toISOString().split('T')[0];
+
+        // Hide invoice output
+        document.getElementById('invoice-output').classList.add('hidden');
+
+        // Reset totals
+        document.getElementById('subtotal-display').textContent = '₹0.00';
+        document.getElementById('gst-display').textContent = '₹0.00';
+        document.getElementById('grand-total-display').textContent = '₹0.00';
+
+        // Reset items - keep only one item row
+        const itemsContainer = document.getElementById('items-container');
+        itemsContainer.innerHTML = `
+          <div class="item-row" data-index="0">
+            <div class="item-fields">
+              <div class="field-group">
+                <label>Item Description:</label>
+                <input type="text" class="item-description" placeholder="Enter item description" required>
+              </div>
+              <div class="field-group">
+                <label>HSN Code:</label>
+                <input type="text" class="item-hsn" placeholder="HSN Code (Optional)">
+              </div>
+              <div class="field-group">
+                <label>Quantity:</label>
+                <input type="number" class="item-quantity" min="1" step="0.01" placeholder="1" required>
+              </div>
+              <div class="field-group">
+                <label>Unit Price (₹):</label>
+                <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
+              </div>
+              <div class="field-group">
+                <label>Total (₹):</label>
+                <input type="number" class="item-total" readonly>
+              </div>
+              <div class="field-group">
+                <button type="button" class="remove-item-btn" onclick="removeItem(0)">Remove</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Reset item index
+        itemIndex = 1;
+
+        // Clear current invoice
+        currentInvoice = null;
+
+        // Load default seller data again
+        if (authManager && authManager.currentUser) {
+          authManager.loadDefaultSellerData();
+        }
+
+        // Scroll back to top of form
+        document.getElementById('create-invoice-section').scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
     }
 
     // Function to switch to create invoice section from "create your first invoice" link
