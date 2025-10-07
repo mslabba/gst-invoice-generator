@@ -399,28 +399,126 @@
 }
 
 @media (max-width: 768px) {
+
+  /* Navigation */
+  .nav-container {
+    padding: 0 15px;
+  }
+
+  .nav-menu {
+    gap: 15px;
+  }
+
+  /* Dashboard layout */
   .dashboard-container {
     flex-direction: column;
+    min-height: calc(100vh - 70px);
   }
 
+  .sidebar,
   .dashboard-sidebar {
     width: 100%;
+    padding: 10px 0;
   }
 
+  .menu,
   .sidebar-menu {
     display: flex;
     overflow-x: auto;
+    padding: 0 15px;
+    gap: 5px;
   }
 
+  .menu li,
   .sidebar-menu li {
     flex-shrink: 0;
+    margin-bottom: 0;
   }
 
+  .menu-item {
+    padding: 10px 15px;
+    white-space: nowrap;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+
+  /* Main content */
+  .main-content,
+  .dashboard-content {
+    padding: 15px;
+  }
+
+  .content-section {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  /* Grids */
   .invoices-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .invoice-card {
+    padding: 15px;
+  }
+
+  .invoice-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
   .invoice-actions {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .invoice-actions button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  /* Tabs */
+  .profile-tabs {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 10px;
+  }
+
+  .main-content,
+  .dashboard-content {
+    padding: 10px;
+  }
+
+  .content-section {
+    padding: 12px;
+  }
+
+  .invoice-card {
+    padding: 12px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+
+  .menu-item {
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
 }

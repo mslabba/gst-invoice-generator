@@ -412,6 +412,228 @@
       .credits-text {
         font-size: 0.8rem;
       }
+
+      /* Enhanced mobile navigation */
+      .nav-container {
+        padding: 0 15px;
+        flex-wrap: wrap;
+      }
+
+      .nav-menu {
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .nav-menu button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+
+      #user-info {
+        font-size: 0.8rem;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Mobile dashboard layout */
+      .dashboard-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        padding: 10px 0;
+      }
+
+      .menu {
+        display: flex;
+        overflow-x: auto;
+        padding: 0 10px;
+        gap: 5px;
+      }
+
+      .menu li {
+        flex-shrink: 0;
+        margin-bottom: 0;
+      }
+
+      .menu-item {
+        padding: 10px 15px;
+        white-space: nowrap;
+        border-radius: 4px;
+        margin: 0;
+        font-size: 0.9rem;
+      }
+
+      /* Mobile content sections */
+      .main-content {
+        padding: 15px;
+      }
+
+      .content-section {
+        padding: 15px;
+        border-radius: 6px;
+      }
+
+      .content-section h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+      }
+
+      /* Mobile forms */
+      .seller-section,
+      .buyer-section {
+        padding: 15px;
+      }
+
+      .item-row {
+        padding: 10px;
+      }
+
+      .totals-section {
+        padding: 12px;
+      }
+
+      .action-buttons {
+        gap: 8px;
+      }
+
+      .action-buttons button {
+        padding: 12px;
+        font-size: 0.9rem;
+      }
+
+      /* Mobile tabs */
+      .profile-tabs,
+      .stock-tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .tab-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        flex: 1;
+        min-width: 120px;
+      }
+
+      /* Mobile product grid */
+      .products-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .product-card {
+        padding: 15px;
+      }
+
+      .product-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .products-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .products-actions button {
+        width: 100%;
+      }
+
+      /* Mobile invoice cards */
+      .invoices-actions {
+        margin-bottom: 15px;
+      }
+
+      .invoices-actions button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .invoice-card {
+        padding: 15px;
+      }
+
+      .invoice-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .invoice-actions button {
+        width: 100%;
+        padding: 10px;
+      }
+
+      /* Mobile create invoice section */
+      #create-invoice-section {
+        max-height: none;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+      }
+
+      /* Mobile loading screen */
+      .loading-content {
+        padding: 20px;
+      }
+
+      .loading-content p {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Additional mobile breakpoint for very small screens */
+    @media (max-width: 480px) {
+      .nav-container h1 {
+        font-size: 1rem;
+      }
+
+      .navbar-logo {
+        height: 28px;
+      }
+
+      .nav-brand {
+        gap: 6px;
+      }
+
+      .main-content {
+        padding: 10px;
+      }
+
+      .content-section {
+        padding: 12px;
+      }
+
+      .seller-buyer-container {
+        gap: 15px;
+      }
+
+      .seller-section,
+      .buyer-section {
+        padding: 12px;
+      }
+
+      .tab-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        min-width: 100px;
+      }
+
+      .credits-text {
+        font-size: 0.7rem;
+      }
+
+      .menu-item {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
