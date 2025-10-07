@@ -1129,7 +1129,7 @@
             if (section === 'create-invoice-section') {
               setTimeout(() => {
                 initializeInvoiceForm();
-                loadProductsInDropdowns();
+                // Products loading is handled in initializeInvoiceForm
               }, 100);
             }
           }
@@ -1573,6 +1573,9 @@
       }
       loadBuyerData();
       setupItemCalculations();
+
+      // Load products for dropdowns (including existing item rows)
+      loadProductsInDropdowns();
     }
 
     // Collect form data function
@@ -1910,6 +1913,9 @@
       container.appendChild(newItem);
       itemIndex++;
       setupItemCalculations();
+
+      // Populate product dropdown for the new item
+      populateProductDropdown(newItem.querySelector('.product-select'));
     }
 
     // Create item row function
@@ -1992,35 +1998,12 @@
 
         // Reset items - keep only one item row
         const itemsContainer = document.getElementById('items-container');
-        itemsContainer.innerHTML = `
-          <div class="item-row" data-index="0">
-            <div class="item-fields">
-              <div class="field-group">
-                <label>Item Description:</label>
-                <input type="text" class="item-description" placeholder="Enter item description" required>
-              </div>
-              <div class="field-group">
-                <label>HSN Code:</label>
-                <input type="text" class="item-hsn" placeholder="HSN Code (Optional)">
-              </div>
-              <div class="field-group">
-                <label>Quantity:</label>
-                <input type="number" class="item-quantity" min="1" step="0.01" placeholder="1" required>
-              </div>
-              <div class="field-group">
-                <label>Unit Price (₹):</label>
-                <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
-              </div>
-              <div class="field-group">
-                <label>Total (₹):</label>
-                <input type="number" class="item-total" readonly>
-              </div>
-              <div class="field-group">
-                <button type="button" class="remove-item-btn" onclick="removeItem(0)">Remove</button>
-              </div>
-            </div>
-          </div>
-        `;
+        itemsContainer.innerHTML = '';
+        const defaultItem = createItemRow(0);
+        itemsContainer.appendChild(defaultItem);
+
+        // Populate product dropdown for the default item
+        populateProductDropdown(defaultItem.querySelector('.product-select'));
 
         // Reset item index
         itemIndex = 1;
@@ -2143,7 +2126,7 @@
           loadProducts();
 
           // Refresh product dropdowns in invoice form
-          loadProductsInDropdowns();
+          await loadProductsInDropdowns();
         } else {
           alert('Error saving product: ' + result.message);
         }
@@ -2153,33 +2136,65 @@
       }
     }
 
+    // Store products globally for reuse
+    let availableProducts = [];
+
     async function loadProductsInDropdowns() {
-      const result = await stockManager.getProducts();
-      if (result.success) {
-        const productSelects = document.querySelectorAll('.product-select');
+      try {
+        console.log('Loading products for dropdowns...');
+        const result = await stockManager.getProducts();
+        if (result.success) {
+          availableProducts = result.products; // Store for reuse
+          console.log('Products loaded:', availableProducts.length);
+          const productSelects = document.querySelectorAll('.product-select');
+          console.log('Found product selects:', productSelects.length);
 
-        productSelects.forEach(select => {
-          // Clear existing options except the first one
-          const firstOption = select.querySelector('option[value=""]');
-          select.innerHTML = '';
-          select.appendChild(firstOption);
-
-          // Add product options
-          result.products.forEach(product => {
-            const option = document.createElement('option');
-            option.value = product.id;
-            option.textContent = `${product.name} (Stock: ${product.stock || 0}) - ₹${(product.price || 0).toFixed(2)}`;
-            option.setAttribute('data-product', JSON.stringify(product));
-            select.appendChild(option);
+          productSelects.forEach(select => {
+            populateProductDropdown(select);
           });
-        });
-
-        // Add change event listeners to product selects
-        productSelects.forEach(select => {
-          select.removeEventListener('change', handleProductSelection);
-          select.addEventListener('change', handleProductSelection);
-        });
+        } else {
+          console.error('Failed to load products:', result.message);
+        }
+      } catch (error) {
+        console.error('Error loading products for dropdowns:', error);
       }
+    }
+
+    function populateProductDropdown(select) {
+      if (!select) {
+        console.warn('No select element provided to populateProductDropdown');
+        return;
+      }
+
+      console.log('Populating dropdown with', availableProducts.length, 'products');
+
+      // Clear existing options except the first one
+      const firstOption = select.querySelector('option[value=""]');
+      select.innerHTML = '';
+      if (firstOption) {
+        select.appendChild(firstOption);
+      } else {
+        // Create default option if it doesn't exist
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- Select from inventory or enter manually --';
+        select.appendChild(defaultOption);
+      }
+
+      // Add product options
+      availableProducts.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = `${product.name} (Stock: ${product.stock || 0}) - ₹${(product.price || 0).toFixed(2)}`;
+        option.setAttribute('data-product', JSON.stringify(product));
+        select.appendChild(option);
+      });
+
+      console.log('Dropdown populated with', select.options.length, 'options');
+
+      // Add change event listener
+      select.removeEventListener('change', handleProductSelection);
+      select.addEventListener('change', handleProductSelection);
     }
 
     function handleProductSelection(e) {
