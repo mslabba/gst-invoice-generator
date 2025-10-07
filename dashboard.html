@@ -307,6 +307,26 @@
       margin-top: 5px;
     }
 
+    /* Navbar styles */
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navbar-logo {
+      height: 40px;
+      width: auto;
+      border-radius: 4px;
+    }
+
+    .nav-container h1 {
+      color: #ecf0f1;
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
       .products-grid {
         grid-template-columns: 1fr;
@@ -323,6 +343,75 @@
       .item-fields {
         grid-template-columns: 1fr;
       }
+
+      .nav-brand {
+        gap: 8px;
+      }
+
+      .nav-container h1 {
+        font-size: 1.2rem;
+      }
+
+      .navbar-logo {
+        height: 32px;
+      }
+    }
+
+    /* Credits section styles */
+    .credits-section {
+      background: #34495e;
+      color: #ecf0f1;
+      padding: 20px 0;
+      text-align: center;
+      border-top: 3px solid #3498db;
+    }
+
+    .credits-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .credits-logo {
+      height: 32px;
+      width: auto;
+      opacity: 0.9;
+    }
+
+    .credits-text {
+      font-size: 0.9rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .credits-text a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .credits-text a:hover {
+      color: #5dade2;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .credits-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .credits-logo {
+        height: 28px;
+      }
+
+      .credits-text {
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
@@ -330,7 +419,10 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <h1>GST Invoice Generator</h1>
+      <div class="nav-brand">
+        <img id="navbar-logo" src="assets/images/logo-fav.png" alt="Logo" class="navbar-logo">
+        <h1>GST Invoice Generator</h1>
+      </div>
       <div class="nav-menu">
         <span id="user-info"></span>
         <button id="logout-btn">Logout</button>
@@ -672,6 +764,16 @@
     </div>
   </div>
 
+  <!-- Credits Section -->
+  <div class="credits-section">
+    <div class="credits-container">
+      <img src="assets/images/logo.png" alt="Turgut Logo" class="credits-logo">
+      <p class="credits-text">
+        Powered by <a href="#" target="_blank">Turgut</a> • GST Invoice Generator
+      </p>
+    </div>
+  </div>
+
   <!-- Add invoice-related scripts -->
   <script src="js/invoice.js"></script>
   <script src="js/pdf-generator.js"></script>
@@ -728,6 +830,9 @@
       // Hide loading screen and show dashboard
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('dashboard-main').style.display = 'flex';
+
+      // Load navbar logo
+      await loadNavbarLogo();
 
       // Tab functionality
       initTabFunctionality();
@@ -809,6 +914,21 @@
         });
       });
     });
+
+    // Function to load company logo in navbar
+    async function loadNavbarLogo() {
+      try {
+        if (authManager && authManager.currentUser) {
+          const companyLogo = await authManager.getCompanyLogo();
+          const navbarLogo = document.getElementById('navbar-logo');
+          if (navbarLogo && companyLogo && companyLogo !== 'assets/images/logo.png') {
+            navbarLogo.src = companyLogo;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading navbar logo:', error);
+      }
+    }
 
     async function loadSavedInvoices() {
       const invoicesList = document.getElementById('saved-invoices-list');
@@ -1170,6 +1290,9 @@
       try {
         await authManager.createUserProfile(authManager.currentUser.uid, profileData);
         alert('Profile updated successfully!');
+
+        // Refresh navbar logo if it was updated
+        await loadNavbarLogo();
       } catch (error) {
         console.error('Error saving profile:', error);
         alert('Error saving profile: ' + error.message);
