@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="assets/images/logo-fav.png">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/dashboard-modules.css">
   <style>
     /* Invoice form specific styles */
     #create-invoice-section {
@@ -1029,6 +1030,10 @@
   <script src="js/invoice.js"></script>
   <script src="js/pdf-generator.js"></script>
 
+  <!-- Include modular dashboard controller -->
+  <script type="module" src="js/dashboard-controller.js"></script>
+
+  <!-- Legacy script for backward compatibility -->
   <script type="module">
     import { authManager } from './js/auth.js';
     import { invoiceStorage } from './js/invoice-storage.js';
@@ -1043,17 +1048,36 @@
       if (invoice) {
         // Open invoice in a new window/modal
         const newWindow = window.open('', '_blank');
-        const htmlContent = await generateInvoiceHTML(invoice);
-        newWindow.document.write(htmlContent);
-        newWindow.document.close();
+
+        if (!newWindow) {
+          alert('Pop-up blocked! Please allow pop-ups for this site to view invoices.');
+          return;
+        }
+
+        try {
+          const htmlContent = await generateInvoiceHTML(invoice);
+          newWindow.document.write(htmlContent);
+          newWindow.document.close();
+        } catch (error) {
+          console.error('Error viewing invoice:', error);
+          newWindow.close();
+          alert('Failed to view invoice. Please try again.');
+        }
       }
     };
 
     window.downloadInvoice = async function (invoiceId) {
       const invoice = savedInvoices.find(inv => inv.id === invoiceId);
       if (invoice) {
-        // Use existing PDF generator
-        await generateInvoicePDF(invoice);
+        try {
+          // Use existing PDF generator
+          await generateInvoicePDF(invoice);
+        } catch (error) {
+          console.error('Error downloading invoice:', error);
+          alert('Failed to download invoice. Please try again.');
+        }
+      } else {
+        alert('Invoice not found.');
       }
     };
 
@@ -1284,8 +1308,23 @@
             .payment-details { margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; }
             .payment-details h3 { margin: 0 0 8px 0; font-size: 14px; }
             .payment-details p { margin: 2px 0; font-size: 11px; }
-            .payment-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; align-items: start; }
-            .qr-section { text-align: center; }
+            .payment-grid { 
+              display: grid; 
+              grid-template-columns: 2fr 1fr; 
+              gap: 15px; 
+              align-items: start;
+              min-height: 100px;
+            }
+            .banking-info { 
+              min-height: 80px; 
+            }
+            .qr-section { 
+              text-align: center; 
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+            }
             .qr-section p { margin-bottom: 5px; font-size: 11px; }
             .qr-section img { height: 80px; width: 80px; }
             @media print {
@@ -1324,6 +1363,19 @@
               }
               .totals { margin-top: 10px !important; }
               .payment-details { margin-top: 10px !important; padding-top: 10px !important; }
+              .payment-grid { 
+                display: grid !important; 
+                grid-template-columns: 2fr 1fr !important; 
+                gap: 10px !important; 
+                align-items: start !important;
+              }
+              .qr-section { 
+                text-align: center !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+              }
               .qr-section img { height: 70px !important; width: 70px !important; }
               div[style*="page-break-inside: avoid"] {
                 page-break-inside: avoid !important;
@@ -1447,14 +1499,26 @@
 
     async function generateInvoicePDF(invoice) {
       const printWindow = window.open('', '_blank');
-      const htmlContent = await generateInvoiceHTML(invoice);
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      printWindow.onload = function () {
-        setTimeout(function () {
-          printWindow.print();
-        }, 500);
-      };
+
+      if (!printWindow) {
+        alert('Pop-up blocked! Please allow pop-ups for this site to generate PDF invoices.');
+        return;
+      }
+
+      try {
+        const htmlContent = await generateInvoiceHTML(invoice);
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.onload = function () {
+          setTimeout(function () {
+            printWindow.print();
+          }, 500);
+        };
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        printWindow.close();
+        alert('Failed to generate PDF. Please try again.');
+      }
     }
 
     function initTabFunctionality() {
@@ -1637,17 +1701,11 @@
         addItemBtn.addEventListener('click', addNewItemHandler);
       }
 
-      // Generate invoice functionality
-      if (generateBtn) {
-        generateBtn.removeEventListener('click', generateInvoiceHandler);
-        generateBtn.addEventListener('click', generateInvoiceHandler);
-      }
+      // Generate invoice functionality is handled by invoice-manager.js
+      // Removed duplicate event handler to prevent double invoice generation
 
-      // Download PDF functionality
-      if (downloadBtn) {
-        downloadBtn.removeEventListener('click', downloadPDFHandler);
-        downloadBtn.addEventListener('click', downloadPDFHandler);
-      }
+      // Download PDF functionality is handled by invoice-manager.js
+      // Removed duplicate event handler to prevent conflicts
 
       // New Invoice button functionality
       const newInvoiceBtn = document.getElementById('new-invoice-btn');
@@ -1828,105 +1886,6 @@
       e.preventDefault();
       addNewItem();
     }
-
-    async function generateInvoiceHandler(e) {
-      e.preventDefault();
-      const invoiceData = collectFormData();
-
-      if (!validateFormData(invoiceData)) {
-        return;
-      }
-
-      // Check stock availability for products
-      for (const item of invoiceData.items) {
-        if (item.productId) {
-          const stockCheck = stockManager.checkStockAvailability(item.productId, item.quantity);
-          if (!stockCheck.available) {
-            alert(`Stock Error: ${stockCheck.message}`);
-            return;
-          }
-        }
-      }
-
-      // Get company logo and add it to seller data
-      const companyLogo = window.authManager ? await window.authManager.getCompanyLogo() : 'assets/images/logo.png';
-      invoiceData.seller.logo = companyLogo;
-
-      // Add custom invoice number and date if provided
-      const customInvoiceNumber = document.getElementById('invoice-number').value.trim();
-      const customDate = document.getElementById('invoice-date').value;
-      invoiceData.customInvoiceNumber = customInvoiceNumber;
-      invoiceData.customDate = customDate;
-
-      const invoice = generateInvoice(invoiceData);
-
-      // Auto-save invoice and process stock
-      try {
-        // Save invoice first
-        const invoiceId = await invoiceStorage.saveInvoice(invoice);
-        console.log('Invoice auto-saved with ID:', invoiceId);
-
-        // Process stock deduction
-        const stockResult = await stockManager.processInvoiceItems(invoiceData.items);
-        if (!stockResult.success) {
-          console.error('Stock processing failed:', stockResult.message);
-          alert('Warning: Invoice saved but stock update failed: ' + stockResult.message);
-        } else {
-          console.log('Stock processed successfully');
-        }
-
-        // Save buyer data if it doesn't exist
-        const buyerData = {
-          name: invoiceData.buyer.name,
-          address: invoiceData.buyer.address,
-          gst: invoiceData.buyer.gst
-        };
-
-        if (buyerData.name && authManager?.currentUser) {
-          await buyerStorage.saveBuyer(buyerData);
-        }
-
-        // Add invoice ID to current invoice for reference
-        currentInvoice = { invoiceData, invoice: { ...invoice, id: invoiceId } };
-
-      } catch (error) {
-        console.error('Error auto-saving invoice:', error);
-        alert('Error saving invoice: ' + error.message);
-        return;
-      }
-
-      displayInvoice(invoice);
-
-      const invoiceOutput = document.getElementById('invoice-output');
-      invoiceOutput.classList.remove('hidden');
-
-      // Scroll to the generated invoice
-      setTimeout(() => {
-        invoiceOutput.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 100);
-    }
-
-    async function downloadPDFHandler(e) {
-      e.preventDefault();
-
-      if (!currentInvoice) {
-        alert('Please generate an invoice first');
-        return;
-      }
-
-      await generateInvoicePDF(currentInvoice.invoice);
-
-      // Refresh saved invoices list if we're on that tab
-      const savedInvoicesSection = document.getElementById('saved-invoices');
-      if (!savedInvoicesSection.classList.contains('hidden')) {
-        loadSavedInvoices();
-      }
-    }
-
-
 
     function loadBuyerData() {
       const buyerSelect = document.getElementById('buyer-select');

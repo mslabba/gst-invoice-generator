@@ -27,10 +27,20 @@ function generateInvoice(data) {
 
     // Get current date - use custom if provided, otherwise use today
     let currentDate;
-    if (data.customDate) {
-        // Convert from YYYY-MM-DD to DD/MM/YYYY format
-        const dateObj = new Date(data.customDate + 'T00:00:00');
-        currentDate = dateObj.toLocaleDateString('en-IN');
+    if (data.customDate && data.customDate.trim()) {
+        try {
+            // Convert from YYYY-MM-DD to DD/MM/YYYY format
+            const dateObj = new Date(data.customDate + 'T00:00:00');
+            if (isNaN(dateObj.getTime())) {
+                // If date is invalid, use current date
+                currentDate = new Date().toLocaleDateString('en-IN');
+            } else {
+                currentDate = dateObj.toLocaleDateString('en-IN');
+            }
+        } catch (error) {
+            console.error('Error parsing date:', error);
+            currentDate = new Date().toLocaleDateString('en-IN');
+        }
     } else {
         currentDate = new Date().toLocaleDateString('en-IN');
     }
