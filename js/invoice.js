@@ -20,7 +20,18 @@ function generateInvoice(data) {
     });
 
     const totalGstAmount = totalCgstAmount + totalSgstAmount;
-    const totalAmount = subtotal + totalGstAmount;
+    
+    // Calculate discount
+    let discountAmount = 0;
+    if (data.discount && data.discount.value > 0) {
+        if (data.discount.type === 'percentage') {
+            discountAmount = (subtotal + totalGstAmount) * (data.discount.value / 100);
+        } else {
+            discountAmount = data.discount.value;
+        }
+    }
+    
+    const totalAmount = subtotal + totalGstAmount - discountAmount;
 
     // Generate invoice number - use custom if provided, otherwise auto-generate
     const invoiceNumber = data.customInvoiceNumber || ('INV-' + Date.now().toString().slice(-6));
@@ -55,6 +66,8 @@ function generateInvoice(data) {
         cgstAmount: totalCgstAmount,
         sgstAmount: totalSgstAmount,
         totalGstAmount: totalGstAmount,
+        discount: data.discount || { type: 'percentage', value: 0 },
+        discountAmount: discountAmount,
         totalAmount: totalAmount
     };
 }

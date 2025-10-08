@@ -234,6 +234,11 @@ class InvoiceManager {
           }
         }
       }
+
+      // Handle discount field changes
+      if (e.target.id === 'discount-input') {
+        this.updateTotals();
+      }
     });
 
     document.addEventListener('change', (e) => {
@@ -242,6 +247,11 @@ class InvoiceManager {
         if (itemRow) {
           this.calculateItemTotal(itemRow);
         }
+      }
+
+      // Handle discount type change
+      if (e.target.id === 'discount-type') {
+        this.updateTotals();
       }
     });
   }
@@ -277,10 +287,29 @@ class InvoiceManager {
     });
 
     const totalGstAmount = totalCgstAmount + totalSgstAmount;
-    const grandTotal = subtotal + totalGstAmount;
+    const beforeDiscountTotal = subtotal + totalGstAmount;
+
+    // Calculate discount
+    const discountType = document.getElementById('discount-type')?.value || 'percentage';
+    const discountValue = parseFloat(document.getElementById('discount-input')?.value) || 0;
+    let discountAmount = 0;
+
+    if (discountValue > 0) {
+      if (discountType === 'percentage') {
+        discountAmount = beforeDiscountTotal * (discountValue / 100);
+      } else {
+        discountAmount = discountValue;
+      }
+    }
+
+    const grandTotal = beforeDiscountTotal - discountAmount;
 
     document.getElementById('subtotal-display').textContent = `₹${subtotal.toFixed(2)}`;
     document.getElementById('gst-display').textContent = `₹${totalGstAmount.toFixed(2)} (CGST: ₹${totalCgstAmount.toFixed(2)} + SGST: ₹${totalSgstAmount.toFixed(2)})`;
+    const discountDisplay = document.getElementById('discount-display');
+    if (discountDisplay) {
+      discountDisplay.textContent = `₹${discountAmount.toFixed(2)}`;
+    }
     document.getElementById('grand-total-display').textContent = `₹${grandTotal.toFixed(2)}`;
   }
 
@@ -460,6 +489,10 @@ class InvoiceManager {
       }
     });
 
+    // Get discount data
+    const discountType = document.getElementById('discount-type').value;
+    const discountValue = parseFloat(document.getElementById('discount-input').value) || 0;
+
     return {
       seller: {
         name: document.getElementById('seller-name').value,
@@ -473,7 +506,11 @@ class InvoiceManager {
       },
       items: items,
       customInvoiceNumber: document.getElementById('invoice-number').value.trim(),
-      customDate: document.getElementById('invoice-date').value
+      customDate: document.getElementById('invoice-date').value,
+      discount: {
+        type: discountType,
+        value: discountValue
+      }
     };
   }
 
@@ -572,6 +609,11 @@ class InvoiceManager {
             <span>SGST:</span>
             <span>₹${(invoice.sgstAmount || 0).toFixed(2)}</span>
           </div>
+          ${(invoice.discountAmount && invoice.discountAmount > 0) ? `
+          <div class="total-row">
+            <span>Discount (${invoice.discount.type === 'percentage' ? invoice.discount.value + '%' : '₹' + invoice.discount.value}):</span>
+            <span>-₹${invoice.discountAmount.toFixed(2)}</span>
+          </div>` : ''}
           <div class="total-row grand-total">
             <span>Grand Total:</span>
             <span>₹${(invoice.totalAmount || 0).toFixed(2)}</span>
@@ -798,6 +840,7 @@ class InvoiceManager {
           <div class="total-row">Subtotal: ₹${(invoice.subtotal || 0).toFixed(2)}</div>
           <div class="total-row">CGST: ₹${(invoice.cgstAmount || 0).toFixed(2)}</div>
           <div class="total-row">SGST: ₹${(invoice.sgstAmount || 0).toFixed(2)}</div>
+          ${(invoice.discountAmount && invoice.discountAmount > 0) ? `<div class="total-row">Discount (${invoice.discount.type === 'percentage' ? invoice.discount.value + '%' : '₹' + invoice.discount.value}): -₹${invoice.discountAmount.toFixed(2)}</div>` : ''}
           <div class="total-row final-total">Grand Total: ₹${(invoice.totalAmount || 0).toFixed(2)}</div>
         </div>
         

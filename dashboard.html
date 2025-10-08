@@ -91,6 +91,22 @@
       margin-bottom: 5px;
     }
 
+    .discount-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      background-color: #e8f4f8;
+      border-radius: 4px;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .discount-row label {
+      margin: 0;
+      font-weight: 500;
+    }
+
     .grand-total {
       font-weight: bold;
       font-size: 1.1em;
@@ -996,6 +1012,17 @@
               <span>GST (SGST + CGST):</span>
               <span id="gst-display">₹0.00</span>
             </div>
+            <div class="total-row discount-row">
+              <label for="discount-input">Discount:</label>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="discount-type" style="width: auto;">
+                  <option value="percentage">%</option>
+                  <option value="fixed">₹</option>
+                </select>
+                <input type="number" id="discount-input" min="0" step="0.01" placeholder="0" style="width: 100px;">
+                <span>= <span id="discount-display">₹0.00</span></span>
+              </div>
+            </div>
             <div class="total-row grand-total">
               <span>Grand Total:</span>
               <span id="grand-total-display">₹0.00</span>
@@ -1445,6 +1472,7 @@
             <div class="total-row">Subtotal: ₹${(invoice.subtotal || 0).toFixed(2)}</div>
             <div class="total-row">CGST: ₹${(invoice.cgstAmount || 0).toFixed(2)}</div>
             <div class="total-row">SGST: ₹${(invoice.sgstAmount || 0).toFixed(2)}</div>
+            ${(invoice.discountAmount && invoice.discountAmount > 0) ? `<div class="total-row">Discount (${invoice.discount.type === 'percentage' ? invoice.discount.value + '%' : '₹' + invoice.discount.value}): -₹${invoice.discountAmount.toFixed(2)}</div>` : ''}
             <div class="total-row final-total">Grand Total: ₹${(invoice.totalAmount || 0).toFixed(2)}</div>
           </div>
           
@@ -1695,11 +1723,8 @@
 
       if (!form) return; // Form not ready yet
 
-      // Add item functionality
-      if (addItemBtn) {
-        addItemBtn.removeEventListener('click', addNewItemHandler); // Remove existing listener
-        addItemBtn.addEventListener('click', addNewItemHandler);
-      }
+      // Add item functionality is handled by invoice-manager.js
+      // Removed duplicate event listener to prevent double item creation
 
       // Generate invoice functionality is handled by invoice-manager.js
       // Removed duplicate event handler to prevent double invoice generation
@@ -1755,6 +1780,10 @@
         }
       });
 
+      // Get discount data
+      const discountType = document.getElementById('discount-type').value;
+      const discountValue = parseFloat(document.getElementById('discount-input').value) || 0;
+
       return {
         seller: {
           name: document.getElementById('seller-name').value,
@@ -1768,7 +1797,11 @@
         },
         items: items,
         customInvoiceNumber: document.getElementById('invoice-number').value.trim(),
-        customDate: document.getElementById('invoice-date').value
+        customDate: document.getElementById('invoice-date').value,
+        discount: {
+          type: discountType,
+          value: discountValue
+        }
       };
     }
 
@@ -1873,6 +1906,11 @@
               <span>Total GST:</span>
               <span>₹${(invoice.totalGstAmount || 0).toFixed(2)}</span>
             </div>
+            ${invoice.discountAmount > 0 ? `
+            <div class="amount-row">
+              <span>Discount (${invoice.discount.type === 'percentage' ? invoice.discount.value + '%' : '₹' + invoice.discount.value}):</span>
+              <span>-₹${invoice.discountAmount.toFixed(2)}</span>
+            </div>` : ''}
             <div class="amount-row total-amount">
               <span>Total Amount:</span>
               <span>₹${(invoice.totalAmount || 0).toFixed(2)}</span>
@@ -1880,11 +1918,6 @@
           </div>
         </div>
       `;
-    }
-
-    function addNewItemHandler(e) {
-      e.preventDefault();
-      addNewItem();
     }
 
     function loadBuyerData() {
@@ -1962,10 +1995,26 @@
       });
 
       const totalGstAmount = totalCgstAmount + totalSgstAmount;
-      const grandTotal = subtotal + totalGstAmount;
+      const beforeDiscountTotal = subtotal + totalGstAmount;
+
+      // Calculate discount
+      const discountType = document.getElementById('discount-type').value;
+      const discountValue = parseFloat(document.getElementById('discount-input').value) || 0;
+      let discountAmount = 0;
+
+      if (discountValue > 0) {
+        if (discountType === 'percentage') {
+          discountAmount = beforeDiscountTotal * (discountValue / 100);
+        } else {
+          discountAmount = discountValue;
+        }
+      }
+
+      const grandTotal = beforeDiscountTotal - discountAmount;
 
       document.getElementById('subtotal-display').textContent = `₹${subtotal.toFixed(2)}`;
       document.getElementById('gst-display').textContent = `₹${totalGstAmount.toFixed(2)} (CGST: ₹${totalCgstAmount.toFixed(2)} + SGST: ₹${totalSgstAmount.toFixed(2)})`;
+      document.getElementById('discount-display').textContent = `₹${discountAmount.toFixed(2)}`;
       document.getElementById('grand-total-display').textContent = `₹${grandTotal.toFixed(2)}`;
     }
 
@@ -1974,87 +2023,15 @@
       updateTotals();
     }
 
-    // Global item index for new items (declared earlier in script)
+    // Item management functions are now handled by invoice-manager.js
+    // Removed duplicate functions to prevent conflicts
 
-    // Add new item function
-    function addNewItem() {
-      const container = document.getElementById('items-container');
-      const newItem = createItemRow(itemIndex);
-      container.appendChild(newItem);
-      itemIndex++;
-      setupItemCalculations();
-
-      // Populate product dropdown for the new item
-      populateProductDropdown(newItem.querySelector('.product-select'));
-    }
-
-    // Create item row function
-    function createItemRow(index) {
-      const itemRow = document.createElement('div');
-      itemRow.className = 'item-row';
-      itemRow.setAttribute('data-index', index);
-
-      itemRow.innerHTML = `
-        <div class="item-fields">
-          <div class="field-group">
-            <label>Select Product (Optional):</label>
-            <select class="product-select">
-              <option value="">-- Select from inventory or enter manually --</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label>Item Description:</label>
-            <input type="text" class="item-description" placeholder="Enter item description" required>
-          </div>
-          <div class="field-group">
-            <label>HSN Code:</label>
-            <input type="text" class="item-hsn" placeholder="HSN Code (Optional)">
-          </div>
-          <div class="field-group">
-            <label>Quantity:</label>
-            <input type="number" class="item-quantity" min="1" step="0.01" value="1" required>
-          </div>
-          <div class="field-group">
-            <label>Unit Price (₹):</label>
-            <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
-          </div>
-          <div class="field-group">
-            <label>SGST + CGST Rate (%):</label>
-            <select class="item-gst-rate" required>
-              <option value="0">0% (0% + 0%)</option>
-              <option value="5">5% (2.5% + 2.5%)</option>
-              <option value="12">12% (6% + 6%)</option>
-              <option value="18">18% (9% + 9%)</option>
-              <option value="28">28% (14% + 14%)</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label>Total (₹):</label>
-            <input type="number" class="item-total" readonly>
-          </div>
-          <div class="field-group">
-            <button type="button" class="remove-item-btn" onclick="removeItem(${index})">Remove</button>
-          </div>
-        </div>
-      `;
-
-      return itemRow;
-    }
-
-    // Remove item function - make it global
+    // Global wrapper function for backward compatibility
     window.removeItem = function (index) {
-      const itemRow = document.querySelector(`[data-index="${index}"]`);
-      if (itemRow) {
-        itemRow.remove();
-        updateTotals();
+      if (window.invoiceManager) {
+        window.invoiceManager.removeItem(index);
       }
-
-      // Prevent removing the last item
-      const remainingItems = document.querySelectorAll('.item-row');
-      if (remainingItems.length === 0) {
-        addNewItem();
-      }
-    }
+    };
 
     // Start new invoice handler
     function startNewInvoiceHandler(e) {
@@ -2412,9 +2389,14 @@
             }
           }
         }
+
+        // Handle discount field changes
+        if (e.target.id === 'discount-input') {
+          calculateGrandTotal();
+        }
       });
 
-      // Add event listener for GST rate changes
+      // Add event listener for GST rate changes and discount type changes
       document.addEventListener('change', function (e) {
         if (e.target.classList.contains('item-gst-rate')) {
           const itemRow = e.target.closest('.item-row');
@@ -2422,6 +2404,11 @@
             calculateItemTotal(itemRow);
             calculateGrandTotal();
           }
+        }
+
+        // Handle discount type change
+        if (e.target.id === 'discount-type') {
+          calculateGrandTotal();
         }
       });
     }
