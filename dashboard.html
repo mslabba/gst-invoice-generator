@@ -757,6 +757,25 @@
               <input type="text" id="product-category" placeholder="Optional category">
             </div>
 
+            <div class="form-group">
+              <label for="product-gst-rate">GST Rate (%):</label>
+              <select id="product-gst-rate" required>
+                <option value="">Select GST Rate</option>
+                <option value="0">0% (No GST)</option>
+                <option value="5">5%</option>
+                <option value="12">12%</option>
+                <option value="18">18%</option>
+                <option value="28">28%</option>
+                <option value="custom">Custom Rate</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="custom-gst-group" style="display: none;">
+              <label for="product-custom-gst">Custom GST Rate (%):</label>
+              <input type="number" id="product-custom-gst" min="0" max="100" step="0.01"
+                placeholder="Enter custom GST rate">
+            </div>
+
             <button type="submit">Add Product</button>
           </form>
         </div>
@@ -945,6 +964,16 @@
                   <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
                 </div>
                 <div class="field-group">
+                  <label>SGST + CGST Rate (%):</label>
+                  <select class="item-gst-rate" required>
+                    <option value="0">0% (0% + 0%)</option>
+                    <option value="5">5% (2.5% + 2.5%)</option>
+                    <option value="12">12% (6% + 6%)</option>
+                    <option value="18">18% (9% + 9%)</option>
+                    <option value="28">28% (14% + 14%)</option>
+                  </select>
+                </div>
+                <div class="field-group">
                   <label>Total (₹):</label>
                   <input type="number" class="item-total" readonly>
                 </div>
@@ -963,7 +992,7 @@
               <span id="subtotal-display">₹0.00</span>
             </div>
             <div class="total-row">
-              <span>GST (2.5%):</span>
+              <span>GST (SGST + CGST):</span>
               <span id="gst-display">₹0.00</span>
             </div>
             <div class="total-row grand-total">
@@ -1196,11 +1225,17 @@
 
       let itemsHtml = '';
       invoice.items.forEach(item => {
+        const itemSubtotal = item.quantity * item.price;
+        const gstRate = item.gstRate || 0;
+        const sgstRate = gstRate / 2;
+        const cgstRate = gstRate / 2;
         itemsHtml += `
           <tr>
             <td>${item.description}${item.hsn ? `<br><small style="color: #666;">HSN: ${item.hsn}</small>` : ''}</td>
             <td style="text-align: center;">${item.quantity}</td>
             <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
+            <td style="text-align: center;">${gstRate}% (${sgstRate}% + ${cgstRate}%)</td>
+            <td style="text-align: right;">₹${itemSubtotal.toFixed(2)}</td>
             <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
           </tr>
         `;
@@ -1342,9 +1377,11 @@
             <thead>
               <tr>
                 <th>Description</th>
-                <th style="text-align: center;">Quantity</th>
+                <th style="text-align: center;">Qty</th>
                 <th style="text-align: right;">Unit Price</th>
-                <th style="text-align: right;">Total</th>
+                <th style="text-align: center;">SGST + CGST Rate (%)</th>
+                <th style="text-align: right;">Subtotal</th>
+                <th style="text-align: right;">Total (inc. GST)</th>
               </tr>
             </thead>
             <tbody>
@@ -1354,8 +1391,8 @@
           
           <div class="totals">
             <div class="total-row">Subtotal: ₹${(invoice.subtotal || 0).toFixed(2)}</div>
-            <div class="total-row">CGST (2.5%): ₹${(invoice.cgstAmount || 0).toFixed(2)}</div>
-            <div class="total-row">SGST (2.5%): ₹${(invoice.sgstAmount || 0).toFixed(2)}</div>
+            <div class="total-row">CGST: ₹${(invoice.cgstAmount || 0).toFixed(2)}</div>
+            <div class="total-row">SGST: ₹${(invoice.sgstAmount || 0).toFixed(2)}</div>
             <div class="total-row final-total">Grand Total: ₹${(invoice.totalAmount || 0).toFixed(2)}</div>
           </div>
           
@@ -1648,10 +1685,11 @@
         const hsn = row.querySelector('.item-hsn').value || '';
         const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
         const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const gstRate = parseFloat(row.querySelector('.item-gst-rate').value) || 0;
         const total = parseFloat(row.querySelector('.item-total').value) || 0;
 
         if (description && quantity > 0 && price >= 0) {
-          const item = { description, hsn, quantity, price, total };
+          const item = { description, hsn, quantity, price, gstRate, total };
           if (productId) {
             item.productId = productId;
           }
@@ -1703,11 +1741,17 @@
 
       let itemsHtml = '';
       invoice.items.forEach(item => {
+        const itemSubtotal = item.quantity * item.price;
+        const gstRate = item.gstRate || 0;
+        const sgstRate = gstRate / 2;
+        const cgstRate = gstRate / 2;
         itemsHtml += `
           <tr>
             <td>${item.description}${item.hsn ? `<br><small>HSN: ${item.hsn}</small>` : ''}</td>
             <td class="text-right">${item.quantity}</td>
             <td class="text-right">₹${item.price.toFixed(2)}</td>
+            <td class="text-right">${gstRate}% (${sgstRate}% + ${cgstRate}%)</td>
+            <td class="text-right">₹${itemSubtotal.toFixed(2)}</td>
             <td class="text-right">₹${item.total.toFixed(2)}</td>
           </tr>
         `;
@@ -1742,9 +1786,11 @@
             <thead>
               <tr>
                 <th>Description</th>
-                <th class="text-right">Quantity</th>
+                <th class="text-right">Qty</th>
                 <th class="text-right">Unit Price</th>
-                <th class="text-right">Total</th>
+                <th class="text-right">SGST + CGST Rate (%)</th>
+                <th class="text-right">Subtotal</th>
+                <th class="text-right">Total (inc. GST)</th>
               </tr>
             </thead>
             <tbody>
@@ -1758,11 +1804,11 @@
               <span>₹${invoice.subtotal.toFixed(2)}</span>
             </div>
             <div class="amount-row">
-              <span>CGST (2.5%):</span>
+              <span>CGST:</span>
               <span>₹${(invoice.cgstAmount || 0).toFixed(2)}</span>
             </div>
             <div class="amount-row">
-              <span>SGST (2.5%):</span>
+              <span>SGST:</span>
               <span>₹${(invoice.sgstAmount || 0).toFixed(2)}</span>
             </div>
             <div class="amount-row">
@@ -1927,33 +1973,40 @@
 
     // Function to calculate item total
     function calculateItemTotal(itemRow) {
-      const quantityInput = itemRow.querySelector('.item-quantity');
-      const priceInput = itemRow.querySelector('.item-price');
-      const totalInput = itemRow.querySelector('.item-total');
-
-      const quantity = parseFloat(quantityInput.value) || 0;
-      const price = parseFloat(priceInput.value) || 0;
-      const total = quantity * price;
-      totalInput.value = total.toFixed(2);
-      updateTotals();
+      updateTotals(); // This now handles individual item calculations too
     }
 
     // Function to update all totals
     function updateTotals() {
-      const itemTotals = document.querySelectorAll('.item-total');
+      const itemRows = document.querySelectorAll('.item-row');
       let subtotal = 0;
+      let totalCgstAmount = 0;
+      let totalSgstAmount = 0;
 
-      itemTotals.forEach(totalInput => {
-        subtotal += parseFloat(totalInput.value) || 0;
+      itemRows.forEach(row => {
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const gstRate = parseFloat(row.querySelector('.item-gst-rate').value) || 0;
+
+        const itemSubtotal = quantity * price;
+        const itemGstAmount = itemSubtotal * (gstRate / 100);
+        const itemCgst = itemGstAmount / 2; // Half of total GST
+        const itemSgst = itemGstAmount / 2; // Half of total GST
+
+        subtotal += itemSubtotal;
+        totalCgstAmount += itemCgst;
+        totalSgstAmount += itemSgst;
+
+        // Update individual item total (including GST)
+        const itemTotal = itemSubtotal + itemGstAmount;
+        row.querySelector('.item-total').value = itemTotal.toFixed(2);
       });
 
-      const cgstAmount = subtotal * 0.025; // 2.5% CGST
-      const sgstAmount = subtotal * 0.025; // 2.5% SGST
-      const totalGstAmount = cgstAmount + sgstAmount;
+      const totalGstAmount = totalCgstAmount + totalSgstAmount;
       const grandTotal = subtotal + totalGstAmount;
 
       document.getElementById('subtotal-display').textContent = `₹${subtotal.toFixed(2)}`;
-      document.getElementById('gst-display').textContent = `₹${totalGstAmount.toFixed(2)} (CGST: ₹${cgstAmount.toFixed(2)} + SGST: ₹${sgstAmount.toFixed(2)})`;
+      document.getElementById('gst-display').textContent = `₹${totalGstAmount.toFixed(2)} (CGST: ₹${totalCgstAmount.toFixed(2)} + SGST: ₹${totalSgstAmount.toFixed(2)})`;
       document.getElementById('grand-total-display').textContent = `₹${grandTotal.toFixed(2)}`;
     }
 
@@ -2005,6 +2058,16 @@
           <div class="field-group">
             <label>Unit Price (₹):</label>
             <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
+          </div>
+          <div class="field-group">
+            <label>SGST + CGST Rate (%):</label>
+            <select class="item-gst-rate" required>
+              <option value="0">0% (0% + 0%)</option>
+              <option value="5">5% (2.5% + 2.5%)</option>
+              <option value="12">12% (6% + 6%)</option>
+              <option value="18">18% (9% + 9%)</option>
+              <option value="28">28% (14% + 14%)</option>
+            </select>
           </div>
           <div class="field-group">
             <label>Total (₹):</label>
@@ -2134,12 +2197,36 @@
       document.getElementById('export-products').addEventListener('click', function () {
         exportProducts();
       });
+
+      // GST rate selection handling
+      const gstRateSelect = document.getElementById('product-gst-rate');
+      const customGstGroup = document.getElementById('custom-gst-group');
+
+      gstRateSelect.addEventListener('change', function () {
+        if (this.value === 'custom') {
+          customGstGroup.style.display = 'block';
+          document.getElementById('product-custom-gst').required = true;
+        } else {
+          customGstGroup.style.display = 'none';
+          document.getElementById('product-custom-gst').required = false;
+          document.getElementById('product-custom-gst').value = '';
+        }
+      });
     }
 
     async function saveProductData() {
       const form = document.getElementById('product-form');
       const isEditing = form.hasAttribute('data-edit-id');
       const editId = form.getAttribute('data-edit-id');
+
+      const gstRateValue = document.getElementById('product-gst-rate').value;
+      let gstRate = 0;
+
+      if (gstRateValue === 'custom') {
+        gstRate = parseFloat(document.getElementById('product-custom-gst').value) || 0;
+      } else {
+        gstRate = parseFloat(gstRateValue) || 0;
+      }
 
       const productData = {
         name: document.getElementById('product-name').value.trim(),
@@ -2148,7 +2235,8 @@
         price: parseFloat(document.getElementById('product-price').value) || 0,
         stock: parseInt(document.getElementById('product-stock').value) || 0,
         unit: document.getElementById('product-unit').value,
-        category: document.getElementById('product-category').value.trim()
+        category: document.getElementById('product-category').value.trim(),
+        gstRate: gstRate
       };
 
       if (!productData.name) {
@@ -2158,6 +2246,11 @@
 
       if (!productData.unit) {
         alert('Please select unit of measurement');
+        return;
+      }
+
+      if (document.getElementById('product-gst-rate').value === '') {
+        alert('Please select GST rate');
         return;
       }
 
@@ -2243,7 +2336,7 @@
       availableProducts.forEach(product => {
         const option = document.createElement('option');
         option.value = product.id;
-        option.textContent = `${product.name} (Stock: ${product.stock || 0}) - ₹${(product.price || 0).toFixed(2)}`;
+        option.textContent = `${product.name} (Stock: ${product.stock || 0}) - ₹${(product.price || 0).toFixed(2)} [GST: ${(product.gstRate || 0)}%]`;
         option.setAttribute('data-product', JSON.stringify(product));
         select.appendChild(option);
       });
@@ -2267,6 +2360,18 @@
           itemRow.querySelector('.item-description').value = productData.name;
           itemRow.querySelector('.item-hsn').value = productData.hsn || '';
           itemRow.querySelector('.item-price').value = productData.price || 0;
+
+          // Set GST rate
+          const gstRate = productData.gstRate || 0;
+          const gstRateSelect = itemRow.querySelector('.item-gst-rate');
+
+          // Check if it's a standard rate, otherwise set to closest standard rate
+          const standardRates = [0, 5, 12, 18, 28];
+          let closestRate = standardRates.reduce((prev, curr) =>
+            Math.abs(curr - gstRate) < Math.abs(prev - gstRate) ? curr : prev
+          );
+
+          gstRateSelect.value = closestRate;
 
           // Calculate total
           calculateItemTotal(itemRow);
@@ -2346,6 +2451,17 @@
                 addStockWarning(itemRow, productData);
               }
             }
+          }
+        }
+      });
+
+      // Add event listener for GST rate changes
+      document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('item-gst-rate')) {
+          const itemRow = e.target.closest('.item-row');
+          if (itemRow) {
+            calculateItemTotal(itemRow);
+            calculateGrandTotal();
           }
         }
       });
