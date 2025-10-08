@@ -254,6 +254,25 @@ window.editProduct = async function (productId) {
     document.getElementById('product-unit').value = product.unit || '';
     document.getElementById('product-category').value = product.category || '';
 
+    // Handle GST rate
+    const gstRate = product.gstRate || 0;
+    const gstRateSelect = document.getElementById('product-gst-rate');
+    const customGstGroup = document.getElementById('custom-gst-group');
+    const customGstInput = document.getElementById('product-custom-gst');
+
+    // Check if it's a standard rate
+    const standardRates = ['0', '5', '12', '18', '28'];
+    if (standardRates.includes(gstRate.toString())) {
+      gstRateSelect.value = gstRate.toString();
+      customGstGroup.style.display = 'none';
+      customGstInput.required = false;
+    } else {
+      gstRateSelect.value = 'custom';
+      customGstGroup.style.display = 'block';
+      customGstInput.value = gstRate;
+      customGstInput.required = true;
+    }
+
     // Change form to edit mode
     const form = document.getElementById('product-form');
     form.setAttribute('data-edit-id', productId);
@@ -324,6 +343,7 @@ window.loadProducts = async function () {
             ${product.description ? `<p><strong>Description:</strong> ${product.description}</p>` : ''}
             ${product.hsn ? `<p><strong>HSN:</strong> ${product.hsn}</p>` : ''}
             <p><strong>Price:</strong> ₹${(product.price || 0).toFixed(2)} per ${product.unit || 'unit'}</p>
+            <p><strong>GST Rate:</strong> ${(product.gstRate || 0)}%</p>
             <p><strong>Stock:</strong> ${stock} ${product.unit || 'units'}</p>
             ${product.category ? `<p><strong>Category:</strong> ${product.category}</p>` : ''}
           </div>

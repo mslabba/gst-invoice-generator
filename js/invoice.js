@@ -1,16 +1,25 @@
 function generateInvoice(data) {
-    const cgstRate = 0.025; // 2.5% CGST
-    const sgstRate = 0.025; // 2.5% SGST
-
-    // Calculate totals
+    // Calculate totals with dynamic GST rates
     let subtotal = 0;
+    let totalCgstAmount = 0;
+    let totalSgstAmount = 0;
+
     data.items.forEach(item => {
-        subtotal += item.total;
+        const itemSubtotal = item.quantity * item.price;
+        const gstRate = (item.gstRate || 0) / 100; // Convert percentage to decimal
+        const itemGstAmount = itemSubtotal * gstRate;
+        const itemCgst = itemGstAmount / 2; // Half of total GST
+        const itemSgst = itemGstAmount / 2; // Half of total GST
+
+        subtotal += itemSubtotal;
+        totalCgstAmount += itemCgst;
+        totalSgstAmount += itemSgst;
+
+        // Update item total to include GST (this should already be calculated in the UI)
+        item.total = itemSubtotal + itemGstAmount;
     });
 
-    const cgstAmount = subtotal * cgstRate;
-    const sgstAmount = subtotal * sgstRate;
-    const totalGstAmount = cgstAmount + sgstAmount;
+    const totalGstAmount = totalCgstAmount + totalSgstAmount;
     const totalAmount = subtotal + totalGstAmount;
 
     // Generate invoice number - use custom if provided, otherwise auto-generate
@@ -33,12 +42,10 @@ function generateInvoice(data) {
         buyer: data.buyer,
         items: data.items,
         subtotal: subtotal,
-        cgstAmount: cgstAmount,
-        sgstAmount: sgstAmount,
+        cgstAmount: totalCgstAmount,
+        sgstAmount: totalSgstAmount,
         totalGstAmount: totalGstAmount,
-        totalAmount: totalAmount,
-        cgstRate: cgstRate * 100, // Convert to percentage for display
-        sgstRate: sgstRate * 100  // Convert to percentage for display
+        totalAmount: totalAmount
     };
 }
 

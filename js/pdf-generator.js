@@ -10,11 +10,17 @@ async function generatePDF(invoiceData) {
     // Create items table HTML
     let itemsTableHtml = '';
     invoice.items.forEach(item => {
+        const itemSubtotal = item.quantity * item.price;
+        const gstRate = item.gstRate || 0;
+        const sgstRate = gstRate / 2;
+        const cgstRate = gstRate / 2;
         itemsTableHtml += `
             <tr>
                 <td>${item.description}${item.hsn ? `<br><small style="color: #666;">HSN: ${item.hsn}</small>` : ''}</td>
                 <td style="text-align: center;">${item.quantity}</td>
                 <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
+                <td style="text-align: center;">${gstRate}% (${sgstRate}% + ${cgstRate}%)</td>
+                <td style="text-align: right;">₹${itemSubtotal.toFixed(2)}</td>
                 <td style="text-align: right;">₹${item.total.toFixed(2)}</td>
             </tr>
         `;
@@ -252,8 +258,10 @@ async function generatePDF(invoiceData) {
                     <thead>
                         <tr>
                             <th>Item Description</th>
-                            <th style="text-align: center;">Quantity</th>
+                            <th style="text-align: center;">Qty</th>
                             <th style="text-align: right;">Unit Price (₹)</th>
+                            <th style="text-align: center;">SGST + CGST Rate (%)</th>
+                            <th style="text-align: right;">Subtotal (₹)</th>
                             <th style="text-align: right;">Total (₹)</th>
                         </tr>
                     </thead>
@@ -269,11 +277,11 @@ async function generatePDF(invoiceData) {
                             <td><strong>₹${invoice.subtotal.toFixed(2)}</strong></td>
                         </tr>
                         <tr>
-                            <td>CGST (2.5%):</td>
+                            <td>CGST:</td>
                             <td>₹${invoice.cgstAmount.toFixed(2)}</td>
                         </tr>
                         <tr>
-                            <td>SGST (2.5%):</td>
+                            <td>SGST:</td>
                             <td>₹${invoice.sgstAmount.toFixed(2)}</td>
                         </tr>
                         <tr>
