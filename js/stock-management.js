@@ -230,6 +230,15 @@ class StockManager {
   getOutOfStockProducts() {
     return this.products.filter(product => (product.stock || 0) === 0);
   }
+
+  // Load products and display in UI (called by dashboard manager)
+  async loadProducts() {
+    if (typeof window.loadProducts === 'function') {
+      await window.loadProducts();
+    } else {
+      console.error('window.loadProducts function not available');
+    }
+  }
 }
 
 // Create global instance

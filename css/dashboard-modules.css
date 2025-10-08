@@ -1,0 +1,431 @@
+/* Dashboard Modules Specific Styles */
+
+/* Loading states */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #2c3e50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  text-align: center;
+  color: #ecf0f1;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #34495e;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast notifications */
+.error-toast,
+.success-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  max-width: 300px;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.error-toast {
+  background: #dc3545;
+  color: white;
+}
+
+.success-toast {
+  background: #28a745;
+  color: white;
+}
+
+/* Image preview styles */
+.image-preview {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.image-preview button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.image-preview button:hover {
+  background-color: #c82333;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 768px) {
+
+  /* Mobile navigation */
+  .nav-container {
+    padding: 0 15px;
+    flex-wrap: wrap;
+  }
+
+  .nav-brand {
+    gap: 8px;
+  }
+
+  .navbar-logo {
+    height: 32px;
+  }
+
+  .nav-container h1 {
+    font-size: 1.2rem;
+  }
+
+  .nav-menu {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-menu button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  #user-info {
+    font-size: 0.8rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Mobile dashboard layout */
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .menu {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 10px;
+    gap: 5px;
+  }
+
+  .menu li {
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  .menu-item {
+    padding: 10px 15px;
+    white-space: nowrap;
+    border-radius: 4px;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile content sections */
+  .main-content {
+    padding: 15px;
+  }
+
+  .content-section {
+    padding: 15px;
+    border-radius: 6px;
+  }
+
+  .content-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+
+  /* Mobile forms */
+  .seller-buyer-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .seller-section,
+  .buyer-section {
+    padding: 15px;
+  }
+
+  .item-row {
+    padding: 10px;
+  }
+
+  .item-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .totals-section {
+    padding: 12px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .action-buttons button {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile tabs */
+  .profile-tabs,
+  .stock-tabs {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  /* Mobile product grid */
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .product-card {
+    padding: 15px;
+  }
+
+  .product-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .products-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .products-actions button {
+    width: 100%;
+  }
+
+  /* Mobile invoice cards */
+  .invoices-actions {
+    margin-bottom: 15px;
+  }
+
+  .invoices-actions button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .invoice-card {
+    padding: 15px;
+  }
+
+  .invoice-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .invoice-actions button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  /* Mobile create invoice section */
+  #create-invoice-section {
+    max-height: none;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px;
+    /* Prevents zoom on iOS */
+  }
+
+  /* Toast notifications on mobile */
+  .error-toast,
+  .success-toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    font-size: 13px;
+  }
+
+  /* Image previews on mobile */
+  .image-preview {
+    padding: 8px;
+  }
+
+  .image-preview img {
+    max-height: 120px;
+  }
+}
+
+/* Additional mobile breakpoint for very small screens */
+@media (max-width: 480px) {
+  .nav-container h1 {
+    font-size: 1rem;
+  }
+
+  .navbar-logo {
+    height: 28px;
+  }
+
+  .nav-brand {
+    gap: 6px;
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .content-section {
+    padding: 12px;
+  }
+
+  .seller-buyer-container {
+    gap: 12px;
+  }
+
+  .seller-section,
+  .buyer-section {
+    padding: 12px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+
+  .menu-item {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .credits-text {
+    font-size: 0.7rem;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .loading-screen {
+    background: #1a1a1a;
+  }
+
+  .loading-content {
+    color: #f0f0f0;
+  }
+
+  .spinner {
+    border-color: #333;
+    border-top-color: #3498db;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .spinner {
+    border-width: 6px;
+    border-top-color: #0066cc;
+  }
+
+  .error-toast {
+    border: 2px solid #cc0000;
+  }
+
+  .success-toast {
+    border: 2px solid #006600;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+
+  .loading-screen,
+  .error-toast,
+  .success-toast {
+    display: none !important;
+  }
+}
+
+/* Focus management for accessibility */
+.tab-btn:focus,
+.menu-item:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* High DPI display support */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
+  .navbar-logo,
+  .credits-logo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}

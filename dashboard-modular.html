@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - GST Invoice Generator</title>
+  <link rel="icon" type="image/png" href="assets/images/logo-fav.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/dashboard-modules.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <img id="navbar-logo" src="assets/images/logo-fav.png" alt="Logo" class="navbar-logo">
+        <h1>GST Invoice Generator</h1>
+      </div>
+      <div class="nav-menu">
+        <span id="user-info"></span>
+        <button id="logout-btn">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Loading Dashboard...</p>
+    </div>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div id="dashboard-main" class="dashboard-container" style="display: none;">
+    <div class="sidebar">
+      <ul class="menu">
+        <li><a href="#" class="menu-item active" data-section="saved-invoices">📋 Saved Invoices</a></li>
+        <li><a href="#" class="menu-item" data-section="stock-management-section">📦 Stock Management</a></li>
+        <li><a href="#" class="menu-item" data-section="profile-section">⚙️ Profile Settings</a></li>
+        <li><a href="#" class="menu-item" data-section="create-invoice-section">📄 Create New Invoice</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <!-- Saved Invoices Section -->
+      <div id="saved-invoices" class="content-section">
+        <h2>Saved Invoices</h2>
+        <div class="invoices-actions">
+          <button id="refresh-invoices" class="secondary-btn">Refresh</button>
+        </div>
+        <div id="saved-invoices-list">
+          <p>Loading saved invoices...</p>
+        </div>
+      </div>
+
+      <!-- Stock Management Section -->
+      <div id="stock-management-section" class="content-section hidden">
+        <h2>Stock Management</h2>
+
+        <!-- Stock Tabs -->
+        <div class="stock-tabs">
+          <button type="button" class="tab-btn active" data-tab="products-tab">Products</button>
+          <button type="button" class="tab-btn" data-tab="add-product-tab">Add Product</button>
+        </div>
+
+        <!-- Products List Tab -->
+        <div id="products-tab" class="tab-content active">
+          <div class="products-actions">
+            <button id="refresh-products" class="secondary-btn">Refresh</button>
+            <button id="export-products" class="secondary-btn">Export</button>
+          </div>
+          <div id="products-list">
+            <p>Loading products...</p>
+          </div>
+        </div>
+
+        <!-- Add Product Tab -->
+        <div id="add-product-tab" class="tab-content">
+          <form id="product-form">
+            <div class="form-group">
+              <label for="product-name">Product Name *</label>
+              <input type="text" id="product-name" required>
+            </div>
+
+            <div class="form-group">
+              <label for="product-description">Description</label>
+              <textarea id="product-description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="product-hsn">HSN Code</label>
+              <input type="text" id="product-hsn">
+            </div>
+
+            <div class="seller-buyer-container">
+              <div class="seller-section">
+                <div class="form-group">
+                  <label for="product-price">Price (₹) *</label>
+                  <input type="number" id="product-price" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                  <label for="product-stock">Stock Quantity *</label>
+                  <input type="number" id="product-stock" min="0" required>
+                </div>
+              </div>
+              <div class="buyer-section">
+                <div class="form-group">
+                  <label for="product-unit">Unit of Measurement *</label>
+                  <select id="product-unit" required>
+                    <option value="">Select Unit</option>
+                    <option value="pcs">Pieces</option>
+                    <option value="kg">Kilogram</option>
+                    <option value="gm">Gram</option>
+                    <option value="ltr">Liter</option>
+                    <option value="mtr">Meter</option>
+                    <option value="box">Box</option>
+                    <option value="pack">Pack</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="product-category">Category</label>
+                  <input type="text" id="product-category" placeholder="e.g., Electronics, Clothing">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="product-gst-rate">GST Rate *</label>
+              <select id="product-gst-rate" required>
+                <option value="">Select GST Rate</option>
+                <option value="0">0%</option>
+                <option value="5">5%</option>
+                <option value="12">12%</option>
+                <option value="18">18%</option>
+                <option value="28">28%</option>
+                <option value="custom">Custom Rate</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="custom-gst-group" style="display: none;">
+              <label for="product-custom-gst">Custom GST Rate (%)</label>
+              <input type="number" id="product-custom-gst" min="0" max="100" step="0.01">
+            </div>
+
+            <button type="submit">Add Product</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Profile Settings Section -->
+      <div id="profile-section" class="content-section hidden">
+        <h2>Profile Settings</h2>
+
+        <!-- Profile Tabs -->
+        <div class="profile-tabs">
+          <button type="button" class="tab-btn active" data-tab="company-tab">Company Details</button>
+          <button type="button" class="tab-btn" data-tab="banking-tab">Banking & Payment</button>
+        </div>
+
+        <form id="profile-form">
+          <!-- Company Details Tab -->
+          <div id="company-tab" class="tab-content active">
+            <div class="form-group">
+              <label for="display-name">Display Name</label>
+              <input type="text" id="display-name">
+            </div>
+
+            <div class="form-group">
+              <label for="default-seller-name">Default Seller Name</label>
+              <input type="text" id="default-seller-name">
+            </div>
+
+            <div class="form-group">
+              <label for="default-seller-address">Default Seller Address</label>
+              <textarea id="default-seller-address" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="default-seller-gst">Default GST Number</label>
+              <input type="text" id="default-seller-gst">
+            </div>
+
+            <div class="form-group">
+              <label for="company-logo">Company Logo</label>
+              <input type="file" id="company-logo" accept="image/*">
+              <small>Upload your company logo (PNG, JPG, GIF)</small>
+              <div id="logo-preview" class="image-preview hidden">
+                <img id="logo-preview-img" alt="Logo Preview">
+                <button type="button" id="remove-logo">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Banking Details Tab -->
+          <div id="banking-tab" class="tab-content">
+            <div class="form-group">
+              <label for="bank-name">Bank Name</label>
+              <input type="text" id="bank-name">
+            </div>
+
+            <div class="form-group">
+              <label for="account-holder">Account Holder Name</label>
+              <input type="text" id="account-holder">
+            </div>
+
+            <div class="form-group">
+              <label for="account-number">Account Number</label>
+              <input type="text" id="account-number">
+            </div>
+
+            <div class="form-group">
+              <label for="ifsc-code">IFSC Code</label>
+              <input type="text" id="ifsc-code">
+            </div>
+
+            <div class="form-group">
+              <label for="branch-name">Branch Name</label>
+              <input type="text" id="branch-name">
+            </div>
+
+            <div class="form-group">
+              <label for="upi-id">UPI ID</label>
+              <input type="text" id="upi-id">
+            </div>
+
+            <div class="form-group">
+              <label for="upi-qr-code">UPI QR Code</label>
+              <input type="file" id="upi-qr-code" accept="image/*">
+              <small>Upload UPI QR Code image</small>
+              <div id="qr-preview" class="image-preview hidden">
+                <img id="qr-preview-img" alt="QR Code Preview">
+                <button type="button" id="remove-qr">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+
+      <!-- Create Invoice Section -->
+      <div id="create-invoice-section" class="content-section hidden">
+        <h2>Create New Invoice</h2>
+
+        <form id="invoice-form">
+          <div class="seller-buyer-container">
+            <div class="seller-section">
+              <h3>Seller Details</h3>
+              <div class="form-group">
+                <label for="seller-name">Name *</label>
+                <input type="text" id="seller-name" required>
+              </div>
+              <div class="form-group">
+                <label for="seller-address">Address *</label>
+                <textarea id="seller-address" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="seller-gst">GST Number</label>
+                <input type="text" id="seller-gst">
+              </div>
+            </div>
+
+            <div class="buyer-section">
+              <h3>Buyer Details</h3>
+              <div class="form-group">
+                <label for="buyer-select">Select Buyer</label>
+                <select id="buyer-select">
+                  <option value="">-- Select a buyer or enter new details --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="buyer-name">Name *</label>
+                <input type="text" id="buyer-name" required>
+              </div>
+              <div class="form-group">
+                <label for="buyer-address">Address *</label>
+                <textarea id="buyer-address" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="buyer-gst">GST Number</label>
+                <input type="text" id="buyer-gst">
+              </div>
+            </div>
+          </div>
+
+          <h3>Invoice Details</h3>
+          <div class="seller-buyer-container">
+            <div class="seller-section">
+              <div class="form-group">
+                <label for="invoice-number">Invoice Number</label>
+                <input type="text" id="invoice-number" placeholder="Leave blank for auto-generation">
+              </div>
+            </div>
+            <div class="buyer-section">
+              <div class="form-group">
+                <label for="invoice-date">Invoice Date *</label>
+                <input type="date" id="invoice-date" required>
+              </div>
+            </div>
+          </div>
+
+          <h3>Invoice Items</h3>
+          <div id="items-container">
+            <div class="item-row" data-index="0">
+              <div class="item-fields">
+                <div class="field-group">
+                  <label>Product</label>
+                  <select class="product-select">
+                    <option value="">-- Select from inventory or enter manually --</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label>Description *</label>
+                  <input type="text" class="item-description" required>
+                </div>
+                <div class="field-group">
+                  <label>HSN Code</label>
+                  <input type="text" class="item-hsn">
+                </div>
+                <div class="field-group">
+                  <label>Quantity *</label>
+                  <input type="number" class="item-quantity" min="0" step="0.01" required>
+                </div>
+                <div class="field-group">
+                  <label>Price (₹) *</label>
+                  <input type="number" class="item-price" min="0" step="0.01" required>
+                </div>
+                <div class="field-group">
+                  <label>GST Rate (%)</label>
+                  <select class="item-gst-rate" required>
+                    <option value="">Select GST</option>
+                    <option value="0">0%</option>
+                    <option value="5">5%</option>
+                    <option value="12">12%</option>
+                    <option value="18">18%</option>
+                    <option value="28">28%</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label>Total (₹)</label>
+                  <input type="number" class="item-total" readonly>
+                </div>
+                <div class="field-group">
+                  <button type="button" onclick="invoiceManager.removeItem(0)" class="btn btn-danger">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="add-item-btn">Add Item</button>
+
+          <div class="totals-section">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span id="subtotal-display">₹0.00</span>
+            </div>
+            <div class="total-row">
+              <span>GST:</span>
+              <span id="gst-display">₹0.00</span>
+            </div>
+            <div class="total-row grand-total">
+              <span>Grand Total:</span>
+              <span id="grand-total-display">₹0.00</span>
+            </div>
+          </div>
+
+          <button type="button" id="generate-invoice">Generate Invoice</button>
+        </form>
+
+        <div id="invoice-output" class="hidden">
+          <div id="invoice-details"></div>
+          <div class="action-buttons">
+            <button id="download-pdf">Download PDF & Save</button>
+            <button id="new-invoice-btn" class="secondary-btn">Start New Invoice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credits Section -->
+  <div class="credits-section">
+    <div class="credits-container">
+      <img src="assets/images/logo.png" alt="Turgut Logo" class="credits-logo">
+      <p class="credits-text">
+        Powered by <a href="#" target="_blank">Turgut</a> • GST Invoice Generator
+      </p>
+    </div>
+  </div>
+
+  <!-- Include existing scripts -->
+  <script src="js/invoice.js"></script>
+  <script src="js/pdf-generator.js"></script>
+
+  <!-- Include modular scripts -->
+  <script type="module" src="js/dashboard-controller.js"></script>
+</body>
+
+</html>
