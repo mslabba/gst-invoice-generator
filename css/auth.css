@@ -10,10 +10,28 @@
 .auth-card {
   background: white;
   padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+  object-fit: contain;
+}
+
+.auth-subtitle {
+  color: #666;
+  font-size: 14px;
+  margin-top: 5px;
 }
 
 .auth-card h1 {
@@ -72,6 +90,32 @@
   background: #2980b9;
 }
 
+.auth-benefits {
+  background: #f8f9ff;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border-left: 4px solid #667eea;
+}
+
+.auth-benefits h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefits-list li {
+  padding: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
 .auth-links {
   text-align: center;
   margin-top: 20px;
@@ -107,4 +151,37 @@
 
 .hidden {
   display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 10px;
+  }
+
+  .auth-card {
+    padding: 30px 20px;
+    max-width: 100%;
+  }
+
+  .auth-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .auth-card h1 {
+    font-size: 20px;
+  }
+
+  .auth-card h2 {
+    font-size: 18px;
+  }
+
+  .auth-benefits {
+    padding: 15px;
+  }
+
+  .benefits-list li {
+    font-size: 13px;
+  }
 }

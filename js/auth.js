@@ -57,7 +57,7 @@ class AuthManager {
     });
   }
 
-  async register(email, password, displayName) {
+  async register(email, password, displayName, mobile = '') {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -66,6 +66,7 @@ class AuthManager {
       await this.createUserProfile(user.uid, {
         email: user.email,
         displayName: displayName,
+        mobile: mobile,
         createdAt: new Date().toISOString()
       });
 
@@ -90,7 +91,7 @@ class AuthManager {
   async logout() {
     try {
       await signOut(auth);
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
       return { success: true, message: 'Logged out successfully!' };
     } catch (error) {
       return { success: false, message: 'Error logging out' };
@@ -129,18 +130,27 @@ class AuthManager {
     console.log('UpdateUI called, current user:', this.currentUser?.email || 'Not logged in');
     console.log('Current page in updateUI:', window.location.href);
 
+    // Check for redirects on auth pages
+    this.handleAuthPageRedirects();
+
     const authButton = document.getElementById('auth-button');
     const userInfo = document.getElementById('user-info');
     const mainContent = document.getElementById('main-content');
     const authRequired = document.getElementById('auth-required');
     const saveInvoiceBtn = document.getElementById('save-invoice');
+    const ctaButtons = document.querySelectorAll('.cta-buttons');
+    const dashboardBtn = document.getElementById('dashboard-btn');
+    const userInfoBar = document.getElementById('user-info-bar');
 
     console.log('Elements found:', {
       authButton: !!authButton,
       userInfo: !!userInfo,
       mainContent: !!mainContent,
       authRequired: !!authRequired,
-      saveInvoiceBtn: !!saveInvoiceBtn
+      saveInvoiceBtn: !!saveInvoiceBtn,
+      ctaButtons: ctaButtons.length,
+      dashboardBtn: !!dashboardBtn,
+      userInfoBar: !!userInfoBar
     });
 
     // Always ensure main content is visible
@@ -172,6 +182,25 @@ class AuthManager {
       if (userInfo) userInfo.textContent = `Welcome, ${this.currentUser.email}`;
       if (authRequired) authRequired.classList.add('hidden');
       if (saveInvoiceBtn) saveInvoiceBtn.classList.remove('hidden');
+      if (userInfoBar) userInfoBar.classList.remove('hidden');
+      if (dashboardBtn) {
+        dashboardBtn.classList.remove('hidden');
+        dashboardBtn.onclick = () => window.location.href = 'dashboard.html';
+      }
+
+      // Update CTA buttons to show Dashboard link instead of Register/Login
+      ctaButtons.forEach(buttonContainer => {
+        buttonContainer.innerHTML = `
+          <a href="dashboard.html" class="btn-primary">Go to Dashboard</a>
+          <button class="logout-cta-btn btn-secondary">Logout</button>
+        `;
+
+        // Add logout functionality
+        const logoutBtn = buttonContainer.querySelector('.logout-cta-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => this.logout());
+        }
+      });
 
       // Load default seller data
       this.loadDefaultSellerData();
@@ -182,6 +211,22 @@ class AuthManager {
       if (userInfo) userInfo.textContent = '';
       if (authRequired) authRequired.classList.remove('hidden');
       if (saveInvoiceBtn) saveInvoiceBtn.classList.add('hidden');
+      if (dashboardBtn) dashboardBtn.classList.add('hidden');
+      if (userInfoBar) userInfoBar.classList.add('hidden');
+    }
+  }
+
+  handleAuthPageRedirects() {
+    // Redirect logged-in users away from auth pages
+    if (this.currentUser) {
+      const currentPage = window.location.pathname;
+      const isAuthPage = currentPage.includes('login.html') || currentPage.includes('register.html');
+
+      if (isAuthPage) {
+        console.log('Redirecting logged-in user from auth page to dashboard');
+        window.location.href = 'dashboard.html';
+        return;
+      }
     }
   }
 

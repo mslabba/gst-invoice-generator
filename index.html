@@ -19,13 +19,95 @@
     <div class="container" id="main-content">
         <!-- User info bar -->
         <div id="user-info-bar" class="user-bar hidden">
-            <span id="user-info"></span>
-            <button id="auth-button">Login</button>
+            <div class="user-menu">
+                <span id="user-info"></span>
+                <div class="user-actions">
+                    <button id="dashboard-btn" class="dashboard-btn hidden">📊 Dashboard</button>
+                    <button id="auth-button">Login</button>
+                </div>
+            </div>
         </div>
 
-        <div class="app-header">
-            <img src="assets/images/logo.png" alt="Logo" class="app-logo">
-            <h1>GST Invoice Generator</h1>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="app-header">
+                <img src="assets/images/logo.png" alt="Logo" class="app-logo">
+                <h1>GST Invoice Generator</h1>
+                <p class="hero-subtitle">Create professional GST-compliant invoices in minutes</p>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <div class="container-narrow">
+                <h2 class="section-title">Why Choose Our Invoice Generator?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧾</div>
+                        <h3>GST Compliant</h3>
+                        <p>Generate invoices that meet all GST requirements with automatic tax calculations</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Quick & Easy</h3>
+                        <p>Create professional invoices in just a few clicks with our intuitive interface</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Mobile Friendly</h3>
+                        <p>Works perfectly on all devices - desktop, tablet, and mobile</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <h3>PDF Export</h3>
+                        <p>Download your invoices as professional PDF documents ready to share</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benefits Section -->
+        <div class="benefits-section">
+            <div class="container-narrow">
+                <h2 class="section-title">Unlock Premium Features</h2>
+                <div class="benefits-comparison">
+                    <div class="benefit-column guest-benefits">
+                        <h3>🔓 Guest Mode</h3>
+                        <ul>
+                            <li>✅ Create invoices instantly</li>
+                            <li>✅ Download PDF</li>
+                            <li>✅ GST calculations</li>
+                            <li>❌ Save invoices</li>
+                            <li>❌ Buyer history</li>
+                            <li>❌ Invoice templates</li>
+                        </ul>
+                    </div>
+                    <div class="benefit-column registered-benefits">
+                        <h3>🔒 Registered Users</h3>
+                        <ul>
+                            <li>✅ Everything in Guest Mode</li>
+                            <li>✅ Save & manage invoices</li>
+                            <li>✅ Buyer database</li>
+                            <li>✅ Quick buyer selection</li>
+                            <li>✅ Invoice history</li>
+                            <li>✅ Custom templates</li>
+                            <li>✅ Cloud backup</li>
+                        </ul>
+                        <div class="cta-buttons">
+                            <a href="register.html" class="btn-primary">Register Free</a>
+                            <a href="login.html" class="btn-secondary">Login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Generator Section -->
+        <div class="generator-section">
+            <div class="container-narrow">
+                <h2 class="section-title">Generate Your Invoice</h2>
+                <p class="section-subtitle">Fill out the form below to create your GST invoice</p>
+            </div>
         </div>
 
         <form id="invoice-form">

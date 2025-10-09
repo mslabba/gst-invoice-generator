@@ -11,6 +11,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const invoiceOutput = document.getElementById('invoice-output');
     const addItemBtn = document.getElementById('add-item-btn');
     const saveInvoiceBtn = document.getElementById('save-invoice');
+    const authButton = document.getElementById('auth-button');
+
+    // Auth button functionality
+    if (authButton) {
+        authButton.addEventListener('click', function () {
+            // Import auth manager dynamically to avoid circular imports
+            import('./auth.js').then(({ authManager }) => {
+                if (authManager.currentUser) {
+                    authManager.logout();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    }
 
     // Add item functionality
     addItemBtn.addEventListener('click', function (e) {
