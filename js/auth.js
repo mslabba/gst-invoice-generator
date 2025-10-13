@@ -141,6 +141,10 @@ class AuthManager {
     const ctaButtons = document.querySelectorAll('.cta-buttons');
     const dashboardBtn = document.getElementById('dashboard-btn');
     const userInfoBar = document.getElementById('user-info-bar');
+    const userStatusBanner = document.getElementById('user-status-banner');
+    const userEmail = document.getElementById('user-email');
+    const heroDashboardBtn = document.getElementById('hero-dashboard-btn');
+    const heroLogoutBtn = document.getElementById('hero-logout-btn');
 
     console.log('Elements found:', {
       authButton: !!authButton,
@@ -150,7 +154,11 @@ class AuthManager {
       saveInvoiceBtn: !!saveInvoiceBtn,
       ctaButtons: ctaButtons.length,
       dashboardBtn: !!dashboardBtn,
-      userInfoBar: !!userInfoBar
+      userInfoBar: !!userInfoBar,
+      userStatusBanner: !!userStatusBanner,
+      userEmail: !!userEmail,
+      heroDashboardBtn: !!heroDashboardBtn,
+      heroLogoutBtn: !!heroLogoutBtn
     });
 
     // Always ensure main content is visible
@@ -188,6 +196,16 @@ class AuthManager {
         dashboardBtn.onclick = () => window.location.href = 'dashboard.html';
       }
 
+      // Show user status banner in hero section
+      if (userStatusBanner) userStatusBanner.classList.remove('hidden');
+      if (userEmail) userEmail.textContent = this.currentUser.email;
+      if (heroDashboardBtn) {
+        heroDashboardBtn.onclick = () => window.location.href = 'dashboard.html';
+      }
+      if (heroLogoutBtn) {
+        heroLogoutBtn.onclick = () => this.logout();
+      }
+
       // Update CTA buttons to show Dashboard link instead of Register/Login
       ctaButtons.forEach(buttonContainer => {
         buttonContainer.innerHTML = `
@@ -204,6 +222,9 @@ class AuthManager {
 
       // Load default seller data
       this.loadDefaultSellerData();
+
+      // Ensure app header logo always shows Turgut logo on index page
+      this.ensureIndexPageLogo();
     } else {
       // User is not logged in
       console.log('Updating UI for guest user');
@@ -213,6 +234,10 @@ class AuthManager {
       if (saveInvoiceBtn) saveInvoiceBtn.classList.add('hidden');
       if (dashboardBtn) dashboardBtn.classList.add('hidden');
       if (userInfoBar) userInfoBar.classList.add('hidden');
+      if (userStatusBanner) userStatusBanner.classList.add('hidden');
+
+      // Ensure app header logo always shows Turgut logo on index page
+      this.ensureIndexPageLogo();
     }
   }
 
@@ -283,14 +308,26 @@ class AuthManager {
         if (sellerAddress && !sellerAddress.value) sellerAddress.value = profile.defaultSellerAddress || '';
         if (sellerGst && !sellerGst.value) sellerGst.value = profile.defaultSellerGst || '';
 
-        // Update logo in app header if custom logo exists
-        const appLogo = document.querySelector('.app-logo');
-        if (appLogo && profile.companyLogo) {
-          appLogo.src = profile.companyLogo;
-        }
+        // Note: Company logo is only used for seller logo input field and invoice generation
+        // The app header logo is protected in ensureIndexPageLogo() function
       }
     } catch (error) {
       console.error('Error loading default seller data:', error);
+    }
+  }
+
+  // Ensure the app header logo always shows Turgut logo on index page
+  ensureIndexPageLogo() {
+    const isIndexPage = window.location.pathname.includes('index.html') ||
+      window.location.pathname === '/' ||
+      window.location.pathname.endsWith('/');
+
+    if (isIndexPage) {
+      const appLogo = document.querySelector('.app-logo');
+      if (appLogo) {
+        appLogo.src = 'assets/images/logo.png';
+        appLogo.alt = 'Turgut Logo';
+      }
     }
   }
 

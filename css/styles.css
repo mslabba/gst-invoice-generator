@@ -11,23 +11,61 @@ body {
     background-color: #f8f9fa;
 }
 
-/* Auth Banner */
+/* Auth Banner - Inside Hero */
 .auth-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     color: white;
     padding: 10px 20px;
     text-align: center;
-    margin-bottom: 0;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .auth-banner a {
     color: white;
     text-decoration: underline;
+    font-weight: bold;
 }
 
 .auth-banner a:hover {
     text-decoration: none;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
 }
+
+/* User Status Banner - Inside Hero */
+.user-status-banner {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.hero-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+
 
 /* User Info Bar */
 .user-bar {
@@ -37,6 +75,12 @@ body {
     padding: 10px 0;
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
+}
+
+body.index-page .user-bar {
+    padding: 10px 20px;
+    background-color: white;
+    margin-bottom: 0;
 }
 
 .user-menu {
@@ -74,6 +118,10 @@ body {
     padding: 60px 0;
     text-align: center;
     margin: -20px -20px 0 -20px;
+}
+
+body.index-page .hero-section {
+    margin: 0;
 }
 
 .hero-subtitle {
@@ -247,6 +295,19 @@ body {
     background: white;
 }
 
+/* Form Section for full width */
+body.index-page #invoice-form {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+body.index-page #invoice-output {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;
@@ -338,6 +399,17 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     margin-top: 20px;
+}
+
+/* Full width container for index page */
+body.index-page .container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    margin-top: 0;
 }
 
 /* App Header */
@@ -572,6 +644,19 @@ input[type="file"] {
     justify-content: space-between;
     padding: 5px 0;
     font-size: 16px;
+}
+
+.gst-breakdown {
+    border-top: 1px solid #bdc3c7;
+    border-bottom: 1px solid #bdc3c7;
+    margin: 10px 0;
+    padding: 10px 0;
+}
+
+.gst-row {
+    color: #7f8c8d;
+    font-size: 14px;
+    padding: 3px 0;
 }
 
 .grand-total {
@@ -842,6 +927,19 @@ input[type="file"] {
     .hero-section {
         margin: -10px -10px 0 -10px;
         padding: 30px 10px;
+    }
+
+    body.index-page .hero-section {
+        margin: 0;
+        padding: 30px 10px;
+    }
+
+    body.index-page .user-bar {
+        padding: 10px;
+    }
+
+    body.index-page #invoice-form {
+        padding: 20px 10px;
     }
 
     .features-section,

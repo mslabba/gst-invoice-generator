@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
         addNewItem();
     });
 
+    // Setup calculations for initial item
+    setupItemCalculations();
+
     // Generate invoice functionality
     generateBtn.addEventListener('click', function (e) {
         e.preventDefault();
@@ -179,6 +182,18 @@ function createItemRow(index) {
                 <input type="number" class="item-price" min="0" step="0.01" placeholder="0.00" required>
             </div>
             <div class="field-group">
+                <label>GST Rate (%):</label>
+                <select class="item-gst-rate">
+                    <option value="0">0% (Exempted)</option>
+                    <option value="0.25">0.25%</option>
+                    <option value="3">3%</option>
+                    <option value="5">5%</option>
+                    <option value="12">12%</option>
+                    <option value="18" selected>18% (Standard)</option>
+                    <option value="28">28% (Luxury)</option>
+                </select>
+            </div>
+            <div class="field-group">
                 <label>Total (₹):</label>
                 <input type="number" class="item-total" readonly>
             </div>
@@ -215,12 +230,18 @@ function setupItemCalculations(specificIndex = null) {
 
         const quantityInput = item.querySelector('.item-quantity');
         const priceInput = item.querySelector('.item-price');
+        const gstRateSelect = item.querySelector('.item-gst-rate');
         const totalInput = item.querySelector('.item-total');
 
         function calculateItemTotal() {
             const quantity = parseFloat(quantityInput.value) || 0;
             const price = parseFloat(priceInput.value) || 0;
-            const total = quantity * price;
+            const gstRate = parseFloat(gstRateSelect.value) || 0;
+
+            const subtotal = quantity * price;
+            const gstAmount = subtotal * (gstRate / 100);
+            const total = subtotal + gstAmount;
+
             totalInput.value = total.toFixed(2);
             updateTotals();
         }
@@ -228,28 +249,82 @@ function setupItemCalculations(specificIndex = null) {
         // Remove any existing event listeners to avoid duplicates
         quantityInput.removeEventListener('input', calculateItemTotal);
         priceInput.removeEventListener('input', calculateItemTotal);
+        gstRateSelect.removeEventListener('change', calculateItemTotal);
 
         quantityInput.addEventListener('input', calculateItemTotal);
         priceInput.addEventListener('input', calculateItemTotal);
+        gstRateSelect.addEventListener('change', calculateItemTotal);
     });
 }
 
 function updateTotals() {
-    const itemTotals = document.querySelectorAll('.item-total');
+    const itemRows = document.querySelectorAll('.item-row');
     let subtotal = 0;
+    const gstBreakdown = {};
 
-    itemTotals.forEach(totalInput => {
-        subtotal += parseFloat(totalInput.value) || 0;
+    itemRows.forEach(row => {
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const gstRate = parseFloat(row.querySelector('.item-gst-rate').value) || 0;
+
+        const itemSubtotal = quantity * price;
+        const itemGst = itemSubtotal * (gstRate / 100);
+        const itemTotal = itemSubtotal + itemGst;
+
+        // Update the item total field
+        row.querySelector('.item-total').value = itemTotal.toFixed(2);
+
+        subtotal += itemSubtotal;
+
+        // Group GST amounts by rate for breakdown
+        if (gstRate > 0) {
+            if (!gstBreakdown[gstRate]) {
+                gstBreakdown[gstRate] = { subtotal: 0, gst: 0 };
+            }
+            gstBreakdown[gstRate].subtotal += itemSubtotal;
+            gstBreakdown[gstRate].gst += itemGst;
+        }
     });
 
-    const cgstAmount = subtotal * 0.025; // 2.5% CGST
-    const sgstAmount = subtotal * 0.025; // 2.5% SGST
-    const totalGstAmount = cgstAmount + sgstAmount;
+    // Calculate total GST
+    let totalGstAmount = 0;
+    Object.values(gstBreakdown).forEach(breakdown => {
+        totalGstAmount += breakdown.gst;
+    });
+
     const grandTotal = subtotal + totalGstAmount;
 
+    // Update displays
     document.getElementById('subtotal-display').textContent = `₹${subtotal.toFixed(2)}`;
-    document.getElementById('gst-display').textContent = `₹${totalGstAmount.toFixed(2)} (CGST: ₹${cgstAmount.toFixed(2)} + SGST: ₹${sgstAmount.toFixed(2)})`;
     document.getElementById('grand-total-display').textContent = `₹${grandTotal.toFixed(2)}`;
+
+    // Update GST breakdown
+    const gstBreakdownDiv = document.getElementById('gst-breakdown');
+    gstBreakdownDiv.innerHTML = '';
+
+    Object.keys(gstBreakdown).sort((a, b) => parseFloat(a) - parseFloat(b)).forEach(rate => {
+        const breakdown = gstBreakdown[rate];
+        const cgst = breakdown.gst / 2;
+        const sgst = breakdown.gst / 2;
+
+        const gstRow = document.createElement('div');
+        gstRow.className = 'total-row gst-row';
+        gstRow.innerHTML = `
+            <span>GST ${rate}% (₹${breakdown.subtotal.toFixed(2)}):</span>
+            <span>₹${breakdown.gst.toFixed(2)} (CGST: ₹${cgst.toFixed(2)} + SGST: ₹${sgst.toFixed(2)})</span>
+        `;
+        gstBreakdownDiv.appendChild(gstRow);
+    });
+
+    if (totalGstAmount === 0) {
+        const noGstRow = document.createElement('div');
+        noGstRow.className = 'total-row gst-row';
+        noGstRow.innerHTML = `
+            <span>GST:</span>
+            <span>₹0.00</span>
+        `;
+        gstBreakdownDiv.appendChild(noGstRow);
+    }
 }
 
 function collectFormData() {
@@ -261,10 +336,11 @@ function collectFormData() {
         const hsn = row.querySelector('.item-hsn').value || '';
         const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
         const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const gstRate = parseFloat(row.querySelector('.item-gst-rate').value) || 0;
         const total = parseFloat(row.querySelector('.item-total').value) || 0;
 
         if (description && quantity > 0 && price >= 0) {
-            items.push({ description, hsn, quantity, price, total });
+            items.push({ description, hsn, quantity, price, gstRate, total });
         }
     });
 
