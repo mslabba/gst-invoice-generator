@@ -5,29 +5,67 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background-color: #f4f4f4;
+    background-color: #f8f9fa;
 }
 
-/* Auth Banner */
+/* Auth Banner - Inside Hero */
 .auth-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     color: white;
     padding: 10px 20px;
     text-align: center;
-    margin-bottom: 0;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .auth-banner a {
     color: white;
     text-decoration: underline;
+    font-weight: bold;
 }
 
 .auth-banner a:hover {
     text-decoration: none;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
 }
+
+/* User Status Banner - Inside Hero */
+.user-status-banner {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.hero-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+
 
 /* User Info Bar */
 .user-bar {
@@ -37,6 +75,237 @@ body {
     padding: 10px 0;
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
+}
+
+body.index-page .user-bar {
+    padding: 10px 20px;
+    background-color: white;
+    margin-bottom: 0;
+}
+
+.user-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dashboard-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-btn:hover {
+    background: #5a67d8;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+    margin: -20px -20px 0 -20px;
+}
+
+body.index-page .hero-section {
+    margin: 0;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    margin-top: 10px;
+    opacity: 0.9;
+}
+
+/* Features Section */
+.features-section {
+    padding: 60px 20px;
+    background: white;
+}
+
+.container-narrow {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 50px;
+    color: #2c3e50;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.feature-card {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.feature-card p {
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Benefits Section */
+.benefits-section {
+    padding: 60px 20px;
+    background: #f8f9fa;
+}
+
+.benefits-comparison {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.benefit-column {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.registered-benefits {
+    border: 3px solid #667eea;
+    position: relative;
+}
+
+.registered-benefits::before {
+    content: "RECOMMENDED";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #667eea;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.benefit-column h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.benefit-column ul {
+    list-style: none;
+    padding: 0;
+}
+
+.benefit-column li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.benefit-column li:last-child {
+    border-bottom: none;
+}
+
+.cta-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Generator Section */
+.generator-section {
+    padding: 60px 20px 40px;
+    background: white;
+}
+
+/* Form Section for full width */
+body.index-page #invoice-form {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+body.index-page #invoice-output {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 /* Action Buttons */
@@ -132,6 +401,17 @@ body {
     margin-top: 20px;
 }
 
+/* Full width container for index page */
+body.index-page .container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    margin-top: 0;
+}
+
 /* App Header */
 .app-header {
     text-align: center;
@@ -141,12 +421,13 @@ body {
 }
 
 .app-logo {
-    height: 60px;
+    height: 80px;
     width: auto;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     display: block;
     margin-left: auto;
     margin-right: auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 h1 {
@@ -363,6 +644,19 @@ input[type="file"] {
     justify-content: space-between;
     padding: 5px 0;
     font-size: 16px;
+}
+
+.gst-breakdown {
+    border-top: 1px solid #bdc3c7;
+    border-bottom: 1px solid #bdc3c7;
+    margin: 10px 0;
+    padding: 10px 0;
+}
+
+.gst-row {
+    color: #7f8c8d;
+    font-size: 14px;
+    padding: 3px 0;
 }
 
 .grand-total {
@@ -587,4 +881,79 @@ input[type="file"] {
 
 .clear-details-btn:hover {
     background-color: #e67e22 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 40px 20px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .benefits-comparison {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        text-align: center;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .invoice-details-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        margin: -10px -10px 0 -10px;
+        padding: 30px 10px;
+    }
+
+    body.index-page .hero-section {
+        margin: 0;
+        padding: 30px 10px;
+    }
+
+    body.index-page .user-bar {
+        padding: 10px;
+    }
+
+    body.index-page #invoice-form {
+        padding: 20px 10px;
+    }
+
+    .features-section,
+    .benefits-section,
+    .generator-section {
+        padding: 40px 10px;
+    }
+
+    .feature-card,
+    .benefit-column {
+        padding: 20px 15px;
+    }
+
+    .feature-icon {
+        font-size: 36px;
+    }
 }
