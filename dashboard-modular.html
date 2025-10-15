@@ -9,6 +9,483 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/dashboard-modules.css">
+  <link rel="stylesheet" href="css/business-accounting.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Font Awesome Icon Styling */
+    .menu-item i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+    
+    .primary-btn i,
+    .secondary-btn i {
+      margin-right: 6px;
+    }
+    
+    .modal-close i {
+      font-size: 18px;
+    }
+    
+    .empty-state-icon {
+      color: #6c757d;
+      margin-bottom: 15px;
+    }
+    
+    .metric-icon i {
+      font-size: 24px;
+    }
+    
+    .action-btn i {
+      margin-right: 8px;
+    }
+    
+    /* Collapsible Menu Styles */
+    .menu-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      cursor: pointer;
+      color: #fff;
+      background: transparent;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      user-select: none;
+      margin: 4px 0;
+      border: 2px solid transparent;
+      font-weight: 500;
+    }
+    
+    .menu-group-header:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(4px);
+    }
+    
+    .menu-group-header.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .menu-group-title {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .menu-group-title i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+    
+    .toggle-icon {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
+    
+    .toggle-icon.rotated {
+      transform: rotate(180deg);
+    }
+    
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      margin: 8px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .submenu.collapsed {
+      max-height: 0;
+    }
+    
+    .submenu.expanded {
+      max-height: 500px;
+    }
+    
+    .submenu li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .submenu li:last-child {
+      border-bottom: none;
+    }
+    
+    .submenu .menu-item {
+      display: block;
+      padding: 12px 20px;
+      margin: 0;
+      border-radius: 0;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-weight: 400;
+    }
+    
+    .submenu .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      padding-left: 24px;
+    }
+    
+    .submenu .menu-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-left: 3px solid rgba(255, 255, 255, 0.5);
+      padding-left: 21px;
+    }
+    
+    .submenu .menu-item i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    /* Main menu item styling */
+    .menu > li > .menu-item {
+      display: block;
+      padding: 14px 16px;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 4px 0;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      border: 2px solid transparent;
+    }
+    
+    .menu > li > .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(4px);
+    }
+    
+    .menu > li > .menu-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .menu > li > .menu-item i {
+      margin-right: 10px;
+      width: 18px;
+      text-align: center;
+      font-size: 16px;
+    }
+    /* Invoice form specific styles */
+    #create-invoice-section {
+      overflow-y: auto;
+    }
+
+    #create-invoice-section .form-group {
+      margin-bottom: 15px;
+    }
+
+    #create-invoice-section .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    #create-invoice-section .form-group input,
+    #create-invoice-section .form-group select,
+    #create-invoice-section .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #create-invoice-section h3 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+      margin: 20px 0 15px 0;
+    }
+
+    .seller-buyer-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .seller-section,
+    .buyer-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .item-row {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+    }
+
+    .item-fields {
+      display: grid;
+      grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field-group label {
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .totals-section {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .discount-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      background-color: #e8f4f8;
+      border-radius: 4px;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .discount-row label {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .grand-total {
+      font-weight: bold;
+      font-size: 1.1em;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-buttons button {
+      flex: 1;
+    }
+
+    .secondary-btn {
+      background-color: #6c757d !important;
+      color: white !important;
+    }
+
+    .secondary-btn:hover {
+      background-color: #5a6268 !important;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 3px;
+      font-style: italic;
+    }
+
+    .stock-warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      margin-top: 5px;
+    }
+
+    .stock-error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      margin-top: 5px;
+    }
+
+    /* Navbar styles */
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navbar-logo {
+      height: 40px;
+      width: auto;
+      border-radius: 4px;
+    }
+
+    .nav-container h1 {
+      color: #ecf0f1;
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    /* Credits section styles */
+    .credits-section {
+      background: #34495e;
+      color: #ecf0f1;
+      padding: 20px 0;
+      text-align: center;
+      border-top: 3px solid #3498db;
+    }
+
+    .credits-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .credits-logo {
+      height: 32px;
+      width: auto;
+      opacity: 0.9;
+    }
+
+    .credits-text {
+      font-size: 0.9rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .credits-text a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .credits-text a:hover {
+      color: #5dade2;
+      text-decoration: underline;
+    }
+
+    /* Activity item styles */
+    .activity-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-content strong {
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+
+    .activity-content p {
+      margin: 2px 0;
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    .activity-amount {
+      font-weight: 600;
+      color: #28a745;
+    }
+
+    @media (max-width: 768px) {
+      .seller-buyer-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .item-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons button {
+        margin-bottom: 10px;
+      }
+
+      /* Mobile create invoice section */
+      #create-invoice-section {
+        max-height: none;
+      }
+
+      .nav-brand {
+        gap: 8px;
+      }
+
+      .nav-container h1 {
+        font-size: 1.2rem;
+      }
+
+      .navbar-logo {
+        height: 32px;
+      }
+
+      .credits-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .credits-logo {
+        height: 28px;
+      }
+
+      .credits-text {
+        font-size: 0.8rem;
+      }
+
+      .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar-logo {
+        height: 28px;
+      }
+
+      .credits-text {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -37,19 +514,173 @@
   <div id="dashboard-main" class="dashboard-container" style="display: none;">
     <div class="sidebar">
       <ul class="menu">
-        <li><a href="#" class="menu-item active" data-section="saved-invoices">📋 Saved Invoices</a></li>
-        <li><a href="#" class="menu-item" data-section="stock-management-section">📦 Stock Management</a></li>
-        <li><a href="#" class="menu-item" data-section="profile-section">⚙️ Profile Settings</a></li>
-        <li><a href="#" class="menu-item" data-section="create-invoice-section">📄 Create New Invoice</a></li>
+        <li><a href="#" class="menu-item active" data-section="dashboard-overview"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="sales">
+            <span class="menu-group-title"><i class="fas fa-chart-line"></i> Sales</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="sales-orders-section"><i class="fas fa-clipboard-list"></i> Sales Orders</a></li>
+            <li><a href="#" class="menu-item" data-section="saved-invoices"><i class="fas fa-file-invoice"></i> Sales Invoices</a></li>
+            <li><a href="#" class="menu-item" data-section="create-invoice-section"><i class="fas fa-plus-circle"></i> Create Invoice</a></li>
+            <li><a href="#" class="menu-item" data-section="customers-section"><i class="fas fa-users"></i> Customers</a></li>
+          </ul>
+        </li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="purchases">
+            <span class="menu-group-title"><i class="fas fa-shopping-cart"></i> Purchases</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="purchase-orders-section"><i class="fas fa-shopping-cart"></i> Purchase Orders</a></li>
+            <li><a href="#" class="menu-item" data-section="purchase-invoices-section"><i class="fas fa-file-invoice-dollar"></i> Purchase Invoices</a></li>
+            <li><a href="#" class="menu-item" data-section="debit-notes-section"><i class="fas fa-sticky-note"></i> Debit Notes</a></li>
+            <li><a href="#" class="menu-item" data-section="suppliers-section"><i class="fas fa-building"></i> Suppliers</a></li>
+          </ul>
+        </li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="payments">
+            <span class="menu-group-title"><i class="fas fa-credit-card"></i> Payments</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="payments-in-section"><i class="fas fa-money-bill-wave"></i> Payment In</a></li>
+            <li><a href="#" class="menu-item" data-section="payments-out-section"><i class="fas fa-credit-card"></i> Payment Out</a></li>
+            <li><a href="#" class="menu-item" data-section="bank-accounts-section"><i class="fas fa-university"></i> Bank Accounts</a></li>
+          </ul>
+        </li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="expenses">
+            <span class="menu-group-title"><i class="fas fa-receipt"></i> Expenses</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="expenses-section"><i class="fas fa-receipt"></i> Expenses</a></li>
+            <li><a href="#" class="menu-item" data-section="expense-categories-section"><i class="fas fa-tags"></i> Categories</a></li>
+          </ul>
+        </li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="inventory">
+            <span class="menu-group-title"><i class="fas fa-boxes"></i> Inventory</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="stock-management-section"><i class="fas fa-boxes"></i> Products</a></li>
+            <li><a href="#" class="menu-item" data-section="stock-movements-section"><i class="fas fa-exchange-alt"></i> Stock Movements</a></li>
+          </ul>
+        </li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="reports">
+            <span class="menu-group-title"><i class="fas fa-chart-bar"></i> Reports</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="outstanding-reports-section"><i class="fas fa-chart-line"></i> Outstanding Reports</a></li>
+            <li><a href="#" class="menu-item" data-section="financial-reports-section"><i class="fas fa-chart-bar"></i> Financial Reports</a></li>
+            <li><a href="#" class="menu-item" data-section="party-ledger-section"><i class="fas fa-book"></i> Party Ledger</a></li>
+          </ul>
+        </li>
+        <li class="menu-group">
+          <div class="menu-group-header" data-group="settings">
+            <span class="menu-group-title"><i class="fas fa-cog"></i> Settings</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <ul class="submenu collapsed">
+            <li><a href="#" class="menu-item" data-section="profile-section"><i class="fas fa-cog"></i> Profile Settings</a></li>
+          </ul>
+        </li>
       </ul>
     </div>
 
     <div class="main-content">
+      <!-- Dashboard Overview Section -->
+      <div id="dashboard-overview" class="content-section">
+        <h2>Business Dashboard</h2>
+        
+        <!-- Key Metrics Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-rupee-sign"></i></div>
+            <div class="metric-content">
+              <h3 id="today-sales">₹0</h3>
+              <p>Today's Sales</p>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="metric-content">
+              <h3 id="month-sales">₹0</h3>
+              <p>This Month's Sales</p>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-users"></i></div>
+            <div class="metric-content">
+              <h3 id="customer-outstanding">₹0</h3>
+              <p>Customer Outstanding</p>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-building"></i></div>
+            <div class="metric-content">
+              <h3 id="supplier-payable">₹0</h3>
+              <p>Supplier Payable</p>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-university"></i></div>
+            <div class="metric-content">
+              <h3 id="bank-balance">₹0</h3>
+              <p>Bank Balance</p>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-boxes"></i></div>
+            <div class="metric-content">
+              <h3 id="stock-value">₹0</h3>
+              <p>Stock Value</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h3>Quick Actions</h3>
+          <div class="action-buttons">
+            <button class="action-btn" data-section="create-invoice-section"><i class="fas fa-file-invoice"></i> Create Invoice</button>
+            <button class="action-btn" data-section="purchase-orders-section"><i class="fas fa-shopping-cart"></i> New Purchase Order</button>
+            <button class="action-btn" data-section="payments-in-section"><i class="fas fa-money-bill-wave"></i> Record Payment</button>
+            <button class="action-btn" data-section="expenses-section"><i class="fas fa-receipt"></i> Add Expense</button>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="recent-activities">
+          <h3>Recent Activities</h3>
+          <div id="recent-activities-list">
+            <p>Loading recent activities...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Orders Section -->
+      <div id="sales-orders-section" class="content-section hidden">
+        <h2>Sales Orders</h2>
+        <div class="section-actions">
+          <button id="create-so-btn" class="primary-btn"><i class="fas fa-plus"></i> Create Sales Order</button>
+          <button id="refresh-so-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="sales-orders-list">
+          <p>Loading sales orders...</p>
+        </div>
+      </div>
+
       <!-- Saved Invoices Section -->
-      <div id="saved-invoices" class="content-section">
-        <h2>Saved Invoices</h2>
+      <div id="saved-invoices" class="content-section hidden">
+        <h2>Sales Invoices</h2>
         <div class="invoices-actions">
-          <button id="refresh-invoices" class="secondary-btn">Refresh</button>
+          <button id="refresh-invoices" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
         </div>
         <div id="saved-invoices-list">
           <p>Loading saved invoices...</p>
@@ -350,7 +981,7 @@
             </div>
           </div>
 
-          <button type="button" id="add-item-btn">Add Item</button>
+          <button type="button" id="add-item-btn"><i class="fas fa-plus"></i> Add Item</button>
 
           <div class="totals-section">
             <div class="total-row">
@@ -361,23 +992,138 @@
               <span>GST:</span>
               <span id="gst-display">₹0.00</span>
             </div>
+            <div class="total-row discount-row">
+              <label for="discount-input">Discount:</label>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="discount-type" style="width: auto;">
+                  <option value="percentage">%</option>
+                  <option value="fixed">₹</option>
+                </select>
+                <input type="number" id="discount-input" min="0" step="0.01" placeholder="0" style="width: 100px;">
+                <span>= <span id="discount-display">₹0.00</span></span>
+              </div>
+            </div>
             <div class="total-row grand-total">
               <span>Grand Total:</span>
               <span id="grand-total-display">₹0.00</span>
             </div>
           </div>
 
-          <button type="button" id="generate-invoice">Generate Invoice</button>
+          <button type="button" id="generate-invoice"><i class="fas fa-file-invoice"></i> Generate Invoice</button>
         </form>
 
         <div id="invoice-output" class="hidden">
           <div id="invoice-details"></div>
           <div class="action-buttons">
-            <button id="download-pdf">Download PDF & Save</button>
-            <button id="new-invoice-btn" class="secondary-btn">Start New Invoice</button>
+            <button id="download-pdf"><i class="fas fa-download"></i> Download PDF & Save</button>
+            <button id="new-invoice-btn" class="secondary-btn"><i class="fas fa-file-plus"></i> Start New Invoice</button>
           </div>
         </div>
       </div>
+
+      <!-- Purchase Orders Section -->
+      <div id="purchase-orders-section" class="content-section hidden">
+        <h2>Purchase Orders</h2>
+        <div class="section-actions">
+          <button id="create-po-btn" class="primary-btn"><i class="fas fa-plus"></i> Create Purchase Order</button>
+          <button id="refresh-po-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="purchase-orders-list">
+          <p>Loading purchase orders...</p>
+        </div>
+      </div>
+
+      <!-- Purchase Invoices Section -->
+      <div id="purchase-invoices-section" class="content-section hidden">
+        <h2>Purchase Invoices</h2>
+        <div class="section-actions">
+          <button id="create-pi-btn" class="primary-btn"><i class="fas fa-plus"></i> Create Purchase Invoice</button>
+          <button id="refresh-pi-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="purchase-invoices-list">
+          <p>Loading purchase invoices...</p>
+        </div>
+      </div>
+
+      <!-- Suppliers Section -->
+      <div id="suppliers-section" class="content-section hidden">
+        <h2>Suppliers</h2>
+        <div class="section-actions">
+          <button id="add-supplier-btn" class="primary-btn"><i class="fas fa-plus"></i> Add Supplier</button>
+          <button id="refresh-suppliers-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="suppliers-list">
+          <p>Loading suppliers...</p>
+        </div>
+      </div>
+
+      <!-- Customers Section -->
+      <div id="customers-section" class="content-section hidden">
+        <h2>Customers</h2>
+        <div class="section-actions">
+          <button id="add-customer-btn" class="primary-btn"><i class="fas fa-plus"></i> Add Customer</button>
+          <button id="refresh-customers-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="customers-list">
+          <p>Loading customers...</p>
+        </div>
+      </div>
+
+      <!-- Payments In Section -->
+      <div id="payments-in-section" class="content-section hidden">
+        <h2>Payment In (Receipts)</h2>
+        <div class="section-actions">
+          <button id="record-payment-in-btn" class="primary-btn"><i class="fas fa-plus"></i> Record Payment</button>
+          <button id="refresh-payments-in-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="payments-in-list">
+          <p>Loading payments...</p>
+        </div>
+      </div>
+
+      <!-- Payments Out Section -->
+      <div id="payments-out-section" class="content-section hidden">
+        <h2>Payment Out (Supplier Payments)</h2>
+        <div class="section-actions">
+          <button id="make-payment-out-btn" class="primary-btn"><i class="fas fa-plus"></i> Make Payment</button>
+          <button id="refresh-payments-out-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="payments-out-list">
+          <p>Loading payments...</p>
+        </div>
+      </div>
+
+      <!-- Expenses Section -->
+      <div id="expenses-section" class="content-section hidden">
+        <h2>Expenses</h2>
+        <div class="section-actions">
+          <button id="add-expense-btn" class="primary-btn"><i class="fas fa-plus"></i> Add Expense</button>
+          <button id="refresh-expenses-btn" class="secondary-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="expenses-list">
+          <p>Loading expenses...</p>
+        </div>
+      </div>
+
+      <!-- Outstanding Reports Section -->
+      <div id="outstanding-reports-section" class="content-section hidden">
+        <h2>Outstanding Reports</h2>
+        <div class="reports-tabs">
+          <button class="tab-btn active" data-tab="customer-outstanding">Customer Outstanding</button>
+          <button class="tab-btn" data-tab="supplier-outstanding">Supplier Outstanding</button>
+        </div>
+        <div id="customer-outstanding" class="tab-content active">
+          <div id="customer-outstanding-list">
+            <p>Loading customer outstanding...</p>
+          </div>
+        </div>
+        <div id="supplier-outstanding" class="tab-content">
+          <div id="supplier-outstanding-list">
+            <p>Loading supplier outstanding...</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -391,12 +1137,309 @@
     </div>
   </div>
 
-  <!-- Include existing scripts -->
+  <!-- Include Firebase and new modules -->
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/database-manager.js"></script>
+  <script type="module" src="js/purchase-manager.js"></script>
+  <script type="module" src="js/payment-manager.js"></script>
+  <script type="module" src="js/expense-manager.js"></script>
+  <script type="module" src="js/business-accounting-controller.js"></script>
+
+  <!-- Include existing scripts for Create Invoice functionality -->
+  <script type="module" src="js/invoice-manager.js"></script>
+  <script type="module" src="js/stock-management.js"></script>
   <script src="js/invoice.js"></script>
   <script src="js/pdf-generator.js"></script>
 
   <!-- Include modular scripts -->
   <script type="module" src="js/dashboard-controller.js"></script>
+
+  <!-- Initialize Business Accounting -->
+  <script>
+    // Function to load company logo in navbar
+    async function loadNavbarLogo() {
+      try {
+        if (window.authManager && window.authManager.currentUser) {
+          const companyLogo = await window.authManager.getCompanyLogo();
+          const navbarLogo = document.getElementById('navbar-logo');
+          if (navbarLogo && companyLogo && companyLogo !== 'assets/images/logo.png') {
+            navbarLogo.src = companyLogo;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading navbar logo:', error);
+      }
+    }
+
+    // Section switching functionality
+    async function showSection(sectionId) {
+      // Hide all content sections
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Show the selected section
+      const targetSection = document.getElementById(sectionId);
+      if (targetSection) {
+        targetSection.classList.remove('hidden');
+      }
+      
+      // Update URL hash without scrolling
+      if (history.pushState) {
+        history.pushState(null, null, '#' + sectionId);
+      } else {
+        location.hash = '#' + sectionId;
+      }
+
+      // Load section data using business controller if available
+      if (window.businessController && window.businessController.loadSectionData) {
+        try {
+          await window.businessController.loadSectionData(sectionId);
+        } catch (error) {
+          console.error('Error loading section data:', error);
+        }
+      }
+    }
+
+    // Collapsible Menu Functionality
+    function initializeCollapsibleMenu() {
+      const menuGroupHeaders = document.querySelectorAll('.menu-group-header');
+      
+      menuGroupHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+          const submenu = this.nextElementSibling;
+          const toggleIcon = this.querySelector('.toggle-icon');
+          const isExpanded = submenu.classList.contains('expanded');
+          
+          // Close all other submenus
+          document.querySelectorAll('.submenu').forEach(menu => {
+            if (menu !== submenu) {
+              menu.classList.remove('expanded');
+              menu.classList.add('collapsed');
+            }
+          });
+          
+          // Reset all toggle icons
+          document.querySelectorAll('.toggle-icon').forEach(icon => {
+            if (icon !== toggleIcon) {
+              icon.classList.remove('rotated');
+            }
+          });
+          
+          // Reset all header active states
+          document.querySelectorAll('.menu-group-header').forEach(h => {
+            if (h !== this) {
+              h.classList.remove('active');
+            }
+          });
+          
+          // Toggle current submenu
+          if (isExpanded) {
+            submenu.classList.remove('expanded');
+            submenu.classList.add('collapsed');
+            toggleIcon.classList.remove('rotated');
+            this.classList.remove('active');
+          } else {
+            submenu.classList.remove('collapsed');
+            submenu.classList.add('expanded');
+            toggleIcon.classList.add('rotated');
+            this.classList.add('active');
+          }
+        });
+      });
+      
+      // Handle main menu item clicks (Dashboard)
+      document.querySelectorAll('.menu > li > .menu-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Remove active class from all menu items
+          document.querySelectorAll('.menu-item').forEach(menuItem => {
+            menuItem.classList.remove('active');
+          });
+          
+          // Close all submenus when clicking main items
+          document.querySelectorAll('.submenu').forEach(menu => {
+            menu.classList.remove('expanded');
+            menu.classList.add('collapsed');
+          });
+          
+          // Reset all toggle icons and headers
+          document.querySelectorAll('.toggle-icon').forEach(icon => {
+            icon.classList.remove('rotated');
+          });
+          document.querySelectorAll('.menu-group-header').forEach(h => {
+            h.classList.remove('active');
+          });
+          
+          // Add active class to clicked item
+          this.classList.add('active');
+          
+          // Handle section switching
+          const section = this.getAttribute('data-section');
+          if (section) {
+            showSection(section).catch(error => {
+              console.error('Error showing section:', error);
+            });
+          }
+        });
+      });
+
+      // Handle submenu item clicks
+      document.querySelectorAll('.submenu .menu-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Remove active class from all menu items
+          document.querySelectorAll('.menu-item').forEach(menuItem => {
+            menuItem.classList.remove('active');
+          });
+          
+          // Add active class to clicked item
+          this.classList.add('active');
+          
+          // Keep the parent submenu open
+          const submenu = this.closest('.submenu');
+          const header = submenu.previousElementSibling;
+          submenu.classList.add('expanded');
+          submenu.classList.remove('collapsed');
+          header.classList.add('active');
+          header.querySelector('.toggle-icon').classList.add('rotated');
+          
+          // Handle section switching
+          const section = this.getAttribute('data-section');
+          if (section) {
+            showSection(section).catch(error => {
+              console.error('Error showing section:', error);
+            });
+          }
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Add small delay to ensure all modules are loaded
+      setTimeout(async () => {
+        try {
+          // Hide loading screen and show dashboard
+          document.getElementById('loading-screen').style.display = 'none';
+          document.getElementById('dashboard-main').style.display = 'flex';
+
+        // Load navbar logo
+        await loadNavbarLogo();
+
+        // Test Firebase connection directly
+        try {
+          console.log('Testing direct Firebase connection...');
+          const { db } = await import('./js/firebase-config.js');
+          const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          
+          const productsRef = collection(db, 'products');
+          const snapshot = await getDocs(productsRef);
+          console.log('Direct Firebase test successful. Products in database:', snapshot.size);
+          
+          snapshot.forEach((doc) => {
+            console.log('Product:', doc.id, doc.data());
+          });
+        } catch (error) {
+          console.error('Direct Firebase test failed:', error);
+        }
+
+        // Initialize Business Accounting Controller first
+        if (window.BusinessAccountingController) {
+          try {
+            window.businessController = new window.BusinessAccountingController();
+            await window.businessController.initialize();
+            console.log('Business Accounting System ready');
+            
+            // Add cleanup functions to global scope for manual use
+            window.cleanupSampleProducts = async () => {
+              const result = await window.businessController.removeSampleProducts();
+              if (result) {
+                console.log('Sample products removed successfully');
+                await window.businessController.refreshProducts();
+              }
+            };
+            
+            // Add function to clean up duplicate invoices
+            window.cleanupDuplicateInvoices = async () => {
+              try {
+                const { db } = await import('./js/firebase-config.js');
+                const { collection, getDocs, deleteDoc, query, orderBy } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                const invoicesRef = collection(db, 'invoices');
+                const q = query(invoicesRef, orderBy('invoiceNumber'));
+                const snapshot = await getDocs(q);
+                
+                const invoiceNumbers = new Map();
+                const duplicates = [];
+                
+                snapshot.forEach((doc) => {
+                  const data = doc.data();
+                  const invoiceNumber = data.invoiceNumber;
+                  
+                  if (invoiceNumbers.has(invoiceNumber)) {
+                    duplicates.push(doc);
+                  } else {
+                    invoiceNumbers.set(invoiceNumber, doc);
+                  }
+                });
+                
+                console.log('Found duplicate invoices:', duplicates.length);
+                
+                for (const duplicate of duplicates) {
+                  await deleteDoc(duplicate.ref);
+                  console.log('Deleted duplicate invoice:', duplicate.data().invoiceNumber);
+                }
+                
+                console.log('Cleanup complete. Removed', duplicates.length, 'duplicate invoices');
+                return duplicates.length;
+              } catch (error) {
+                console.error('Error cleaning up duplicate invoices:', error);
+                return 0;
+              }
+            };
+            
+          } catch (error) {
+            console.error('Failed to initialize Business Accounting System:', error);
+          }
+        }
+
+        // Initialize Invoice Manager for Create Invoice section
+        if (window.InvoiceManager) {
+          try {
+            window.invoiceManager = new window.InvoiceManager();
+            console.log('Invoice Manager ready');
+          } catch (error) {
+            console.error('Failed to initialize Invoice Manager:', error);
+          }
+        }
+
+        // Initialize collapsible menu after controllers are ready
+        initializeCollapsibleMenu();
+
+        // Initialize action buttons
+        document.querySelectorAll('.action-btn[data-section]').forEach(button => {
+          button.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            if (section) {
+              showSection(section).catch(error => {
+                console.error('Error showing section from action button:', error);
+              });
+            }
+          });
+        });
+
+          console.log('Dashboard initialization complete');
+        } catch (error) {
+          console.error('Error during dashboard initialization:', error);
+        }
+      }, 1000);
+    });
+
+  // Make loadNavbarLogo available globally for profile updates
+  window.loadNavbarLogo = loadNavbarLogo;
+  </script>
 </body>
 
 </html>

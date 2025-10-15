@@ -109,14 +109,56 @@ class InvoiceManager {
   // Load products for dropdowns
   async loadProductsInDropdowns() {
     try {
-      const result = await stockManager.getProducts();
-      if (result.success) {
-        this.availableProducts = result.products;
-        const productSelects = document.querySelectorAll('.product-select');
-        productSelects.forEach(select => {
-          this.populateProductDropdown(select);
-        });
+      // Try new database system first
+      let products = [];
+      
+      if (window.businessController && window.businessController.modules.database) {
+        try {
+          products = await window.businessController.modules.database.getAll('products');
+          console.log('Loaded products from new database system:', products.length);
+        } catch (error) {
+          console.log('New database system not available, trying stock manager...');
+        }
       }
+      
+      // Fallback to stock manager if new system has no products
+      if (products.length === 0) {
+        const result = await stockManager.getProducts();
+        if (result.success) {
+          // Map old format to new format for consistency
+          products = result.products.map(p => ({
+            id: p.id,
+            product_name: p.name || p.product_name,
+            selling_price: p.price || p.selling_price || 0,
+            current_stock: p.stock || p.current_stock || 0,
+            gst_rate: p.gstRate || p.gst_rate || 18,
+            // Keep original fields for backward compatibility
+            name: p.name,
+            price: p.price,
+            stock: p.stock,
+            gstRate: p.gstRate
+          }));
+          console.log('Loaded products from stock manager:', products.length);
+        }
+      } else {
+        // Map new format to old format for backward compatibility
+        products = products.map(p => ({
+          ...p,
+          name: p.product_name || p.name,
+          price: p.selling_price || p.price,
+          stock: p.current_stock || p.stock,
+          gstRate: p.gst_rate || p.gstRate
+        }));
+      }
+      
+      this.availableProducts = products;
+      const productSelects = document.querySelectorAll('.product-select');
+      productSelects.forEach(select => {
+        this.populateProductDropdown(select);
+      });
+      
+      console.log('Final available products for invoice:', this.availableProducts.length);
+      
     } catch (error) {
       console.error('Error loading products for dropdowns:', error);
     }
@@ -911,5 +953,6 @@ const invoiceManager = new InvoiceManager();
 
 // Make it globally available
 window.invoiceManager = invoiceManager;
+window.InvoiceManager = InvoiceManager;
 
-export { invoiceManager };
+export { invoiceManager, InvoiceManager };
