@@ -48,14 +48,22 @@ class InvoiceStorage {
   // Get all invoices for current user
   async getUserInvoices() {
     try {
-      if (!auth.currentUser) {
+      let currentUser = auth.currentUser;
+      if (!currentUser && window.authManager) {
+        currentUser = await window.authManager.waitForAuthState();
+      }
+
+      if (!currentUser) {
+        console.warn('InvoiceStorage: User not logged in');
         return { success: false, invoices: [], message: 'User not logged in' };
       }
 
+      console.log('InvoiceStorage: Fetching invoices for user:', currentUser.uid);
+
+      // Query by userId without requiring a composite Firestore index
       const q = query(
         collection(db, this.invoicesCollection),
-        where('userId', '==', auth.currentUser.uid),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', currentUser.uid)
       );
 
       const querySnapshot = await getDocs(q);
@@ -68,6 +76,14 @@ class InvoiceStorage {
         });
       });
 
+      // Sort by createdAt / date descending in memory
+      invoices.sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a.date ? new Date(a.date).getTime() : 0);
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b.date ? new Date(b.date).getTime() : 0);
+        return timeB - timeA;
+      });
+
+      console.log(`InvoiceStorage: Loaded ${invoices.length} invoices`);
       return { success: true, invoices, message: 'Invoices loaded successfully' };
     } catch (error) {
       console.error('Error getting invoices:', error);
@@ -119,8 +135,7 @@ class InvoiceStorage {
 
     const q = query(
       collection(db, this.invoicesCollection),
-      where('userId', '==', auth.currentUser.uid),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', auth.currentUser.uid)
     );
 
     return onSnapshot(q, (querySnapshot) => {
@@ -131,7 +146,15 @@ class InvoiceStorage {
           ...doc.data()
         });
       });
+      invoices.sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a.date ? new Date(a.date).getTime() : 0);
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b.date ? new Date(b.date).getTime() : 0);
+        return timeB - timeA;
+      });
       callback({ success: true, invoices });
+    }, (error) => {
+      console.error('Error in listenToUserInvoices:', error);
+      callback({ success: false, invoices: [], error });
     });
   }
 }

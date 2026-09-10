@@ -4,12 +4,15 @@
   "description": "A simple GST invoice generator web application.",
   "main": "src/js/app.js",
   "scripts": {
-    "start": "live-server src",
+    "start": "live-server .",
     "build": "echo 'Build step can be added here.'"
   },
   "dependencies": {
     "jspdf": "^2.5.1"
   },
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
 }

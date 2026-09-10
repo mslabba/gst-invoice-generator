@@ -35,17 +35,11 @@ class AuthManager {
     console.log('Page title:', document.title);
     console.log('All elements with ID:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
 
-    // Ensure main content is visible immediately on page load
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-      console.log('Found main content, making it visible');
+    // Ensure main content is visible immediately on page load (for non-dashboard pages)
+    const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
+    if (mainContent && !window.location.pathname.includes('dashboard')) {
       mainContent.classList.remove('hidden');
       mainContent.style.display = 'block';
-    } else {
-      console.log('Main content not found during init');
-      // Try to find any container elements
-      const containers = document.querySelectorAll('.container, [class*="content"], [id*="content"]');
-      console.log('Found container-like elements:', Array.from(containers).map(el => ({ tag: el.tagName, id: el.id, class: el.className })));
     }
 
     // Listen for auth state changes
@@ -135,7 +129,7 @@ class AuthManager {
 
     const authButton = document.getElementById('auth-button');
     const userInfo = document.getElementById('user-info');
-    const mainContent = document.getElementById('main-content');
+    const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
     const authRequired = document.getElementById('auth-required');
     const saveInvoiceBtn = document.getElementById('save-invoice');
     const ctaButtons = document.querySelectorAll('.cta-buttons');
@@ -161,26 +155,11 @@ class AuthManager {
       heroLogoutBtn: !!heroLogoutBtn
     });
 
-    // Always ensure main content is visible
-    if (mainContent) {
+    // Ensure main content is visible if present (e.g. index.html)
+    if (mainContent && !window.location.pathname.includes('dashboard')) {
       mainContent.classList.remove('hidden');
       mainContent.style.display = 'block';
       mainContent.style.visibility = 'visible';
-      console.log('Main content made visible, current styles:', {
-        display: mainContent.style.display,
-        visibility: mainContent.style.visibility,
-        classes: mainContent.className
-      });
-    } else {
-      console.error('Main content element not found!');
-      // Try to make any content visible
-      const containers = document.querySelectorAll('.container, form, main');
-      console.log('Trying to make these containers visible:', containers);
-      containers.forEach(container => {
-        container.style.display = 'block';
-        container.style.visibility = 'visible';
-        container.classList.remove('hidden');
-      });
     }
 
     if (this.currentUser) {

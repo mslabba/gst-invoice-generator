@@ -123,35 +123,53 @@ class DashboardManager {
     const invoicesList = document.getElementById('saved-invoices-list');
     if (!invoicesList) return;
 
-    invoicesList.innerHTML = '<p>Loading...</p>';
+    invoicesList.innerHTML = '<p>Loading saved invoices...</p>';
 
-    const result = await invoiceStorage.getUserInvoices();
-    if (result.success && result.invoices.length > 0) {
-      this.savedInvoices = result.invoices;
-      this.renderInvoicesList(result.invoices);
-    } else if (result.success && result.invoices.length === 0) {
-      invoicesList.innerHTML = '<p>No saved invoices found. <a href="#" onclick="dashboardManager.switchToCreateInvoice()">Create your first invoice</a></p>';
-    } else {
-      invoicesList.innerHTML = '<p>Error loading invoices: ' + result.message + '</p>';
+    try {
+      const result = await invoiceStorage.getUserInvoices();
+      if (result.success && result.invoices && result.invoices.length > 0) {
+        this.savedInvoices = result.invoices;
+        this.renderInvoicesList(result.invoices);
+      } else if (result.success && (!result.invoices || result.invoices.length === 0)) {
+        invoicesList.innerHTML = '<p>No saved invoices found. <a href="#" onclick="dashboardManager.switchToCreateInvoice(); return false;">Create your first invoice</a></p>';
+      } else {
+        invoicesList.innerHTML = '<p>Error loading invoices: ' + (result.message || 'Unknown error') + '</p>';
+      }
+    } catch (error) {
+      console.error('Error loading invoices in dashboard manager:', error);
+      invoicesList.innerHTML = '<p>Error loading invoices: ' + error.message + '</p>';
     }
   }
 
   // Render invoices list
   renderInvoicesList(invoices) {
     const invoicesList = document.getElementById('saved-invoices-list');
+    if (!invoicesList) return;
+
+    if (!invoices || invoices.length === 0) {
+      invoicesList.innerHTML = '<p>No saved invoices found. <a href="#" onclick="dashboardManager.switchToCreateInvoice(); return false;">Create your first invoice</a></p>';
+      return;
+    }
+
     let invoicesHtml = '<div class="invoices-grid">';
 
     invoices.forEach(invoice => {
+      const buyerName = invoice.buyer?.name || (typeof invoice.buyer === 'string' ? invoice.buyer : 'N/A');
+      const invoiceNum = invoice.invoiceNumber || 'N/A';
+      const dateStr = invoice.date || (invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString('en-IN') : 'N/A');
+      const itemsCount = Array.isArray(invoice.items) ? invoice.items.length : 0;
+      const totalAmount = typeof invoice.totalAmount === 'number' ? invoice.totalAmount : (parseFloat(invoice.totalAmount) || 0);
+
       invoicesHtml += `
         <div class="invoice-card">
           <div class="invoice-header">
-            <h3>Invoice #${invoice.invoiceNumber}</h3>
-            <span class="invoice-date">${new Date(invoice.createdAt).toLocaleDateString()}</span>
+            <h3>Invoice #${invoiceNum}</h3>
+            <span class="invoice-date">${dateStr}</span>
           </div>
           <div class="invoice-details">
-            <p><strong>To:</strong> ${invoice.buyer.name}</p>
-            <p><strong>Amount:</strong> ₹${(invoice.totalAmount || 0).toFixed(2)}</p>
-            <p><strong>Items:</strong> ${invoice.items.length}</p>
+            <p><strong>To:</strong> ${buyerName}</p>
+            <p><strong>Amount:</strong> ₹${totalAmount.toFixed(2)}</p>
+            <p><strong>Items:</strong> ${itemsCount}</p>
           </div>
           <div class="invoice-actions">
             <button onclick="dashboardManager.viewInvoice('${invoice.id}')" class="btn btn-primary">View</button>
